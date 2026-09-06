@@ -84,8 +84,27 @@ export function useQueue() {
   return queue;
 }
 
+export type Route = Tables<"routes">;
+export type StopWithRoute = Stop & { route: Pick<Route, "id" | "code" | "status" | "scheduled_date" | "total_distance_miles" | "estimated_duration_minutes"> | null };
+
 export function stopsQueryKey() {
   return ["stops"] as const;
+}
+
+export function useActiveRoute() {
+  return useQuery({
+    queryKey: ["route", "active"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("routes")
+        .select("*")
+        .in("status", ["active", "assigned"])
+        .order("scheduled_date", { ascending: false })
+        .limit(1);
+      if (error) throw error;
+      return (data?.[0] ?? null) as Route | null;
+    },
+  });
 }
 
 export function useStops() {
@@ -94,13 +113,18 @@ export function useStops() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("stops")
-        .select("*")
+        .select(
+          "*, route:routes!inner(id, code, status, scheduled_date, total_distance_miles, estimated_duration_minutes)",
+        )
+        .in("routes.status", ["active", "assigned"])
+        .order("sequence_order", { ascending: true, nullsFirst: false })
         .order("seq", { ascending: true });
       if (error) throw error;
-      return data as Stop[];
+      return (data ?? []) as unknown as StopWithRoute[];
     },
   });
 }
+
 
 export function usePackages(stopId?: string) {
   return useQuery({
