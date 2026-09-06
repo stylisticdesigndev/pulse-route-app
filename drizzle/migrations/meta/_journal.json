@@ -29,6 +29,13 @@
       "when": 1788731862304,
       "tag": "0003_pulseroute_fleet_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788731881985,
+      "tag": "0004_proof_of_service_storage_policies",
+      "breakpoints": true
     }
   ]
 }
