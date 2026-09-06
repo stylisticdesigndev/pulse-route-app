@@ -1,8 +1,18 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Check, Flashlight, HelpCircle, Keyboard, Package, X } from "lucide-react";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  Check,
+  Flashlight,
+  HelpCircle,
+  Keyboard,
+  LifeBuoy,
+  Package,
+  TriangleAlert,
+  X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AppShell, BigButton, Pill } from "@/components/pulse/shell";
+import { PermissionGate } from "@/components/pulse/states";
 import { stopLabel, usePackages, useScanPackage, useStops } from "@/lib/pulse-data";
 
 export const Route = createFileRoute("/scan/$seq")({
@@ -33,23 +43,47 @@ function Scanner() {
   const scan = useScanPackage();
   const [torch, setTorch] = useState(false);
   const [manual, setManual] = useState("");
+  const [showManual, setShowManual] = useState(false);
+  const [rejected, setRejected] = useState<string | null>(null);
+  const [cameraDenied, setCameraDenied] = useState(false);
 
   const next = packages.find((p) => !p.scanned);
   const scanned = packages.filter((p) => p.scanned).length;
   const focus = next ?? packages[packages.length - 1];
+
+  useEffect(() => {
+    let cancelled = false;
+    async function probe() {
+      const perms = (navigator as Navigator & { permissions?: Permissions }).permissions;
+      if (!perms?.query) return;
+      try {
+        const status = await perms.query({ name: "camera" as PermissionName });
+        if (!cancelled) setCameraDenied(status.state === "denied");
+      } catch {
+        /* permission name unsupported — treat as available */
+      }
+    }
+    void probe();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function confirm(code?: string) {
     const target = code
       ? packages.find((p) => p.code.toLowerCase() === code.trim().toLowerCase())
       : next;
     if (!target) {
-      toast.error("Barcode not on this stop's manifest");
+      setRejected(code?.trim() || "unreadable");
       return;
     }
+    setRejected(null);
     await scan.mutateAsync(target.id);
     toast.success(`PKG #${target.code} stowed`);
     setManual("");
+    setShowManual(false);
   }
+
 
   return (
     <AppShell className="flex flex-col">
