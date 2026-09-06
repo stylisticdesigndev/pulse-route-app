@@ -26,10 +26,19 @@ export const Route = createFileRoute("/metrics")({
 
 function Metrics() {
   const { data: stops = [] } = useStops();
-  const { data: events = [] } = useEvents();
+  const { data: events = [], isLoading, isError, refetch, isFetching } = useEvents();
+  const { data: shift, isLoading: shiftLoading } = useActiveShift();
   const queue = useQueue();
   const delivered = stops.filter((s) => s.status === "completed").length;
   const exceptions = stops.filter((s) => s.status === "exception").length;
+
+  if (!shiftLoading && !shift) {
+    return (
+      <AppShell bottomNav>
+        <OffShiftState />
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell bottomNav>
@@ -56,15 +65,34 @@ function Metrics() {
           </Link>
         ) : null}
 
+        {isError ? (
+          <ErrorState
+            title="Metrics didn't load"
+            body="The event timeline is temporarily unreachable."
+            onRetry={() => refetch()}
+            retrying={isFetching}
+          />
+        ) : null}
+
         <p className="px-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
           Event timeline
         </p>
+
+        {!isLoading && !isError && events.length === 0 ? (
+          <EmptyState
+            icon={LineChart}
+            title="No activity yet this shift"
+            body="Clear your first stop and every proof of service lands on this timeline."
+            action={
+              <Link to="/manifest">
+                <BigButton tone="ghost">Go to manifest</BigButton>
+              </Link>
+            }
+          />
+        ) : null}
+
         <ul className="space-y-2">
-          {events.length === 0 ? (
-            <li className="rounded-xl border border-border bg-surface px-4 py-6 text-center text-sm text-muted-foreground">
-              No synced events yet.
-            </li>
-          ) : null}
+
           {events.map((event) => {
             const stop = stops.find((s) => s.id === event.stop_id);
             const failed = event.event_type === "exception";
