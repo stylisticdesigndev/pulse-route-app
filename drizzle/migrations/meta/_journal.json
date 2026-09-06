@@ -8,6 +8,20 @@
       "when": 1788726889631,
       "tag": "0000_pulseroute_core",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788728474151,
+      "tag": "0001_pulseroute_aux_screens",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788728492320,
+      "tag": "0002_driver_avatar_storage_policies",
+      "breakpoints": true
     }
   ]
 }

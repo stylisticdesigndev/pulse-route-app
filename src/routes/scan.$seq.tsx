@@ -1,8 +1,18 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Check, Flashlight, HelpCircle, Keyboard, Package, X } from "lucide-react";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  Check,
+  Flashlight,
+  HelpCircle,
+  Keyboard,
+  LifeBuoy,
+  Package,
+  TriangleAlert,
+  X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AppShell, BigButton, Pill } from "@/components/pulse/shell";
+import { PermissionGate } from "@/components/pulse/states";
 import { stopLabel, usePackages, useScanPackage, useStops } from "@/lib/pulse-data";
 
 export const Route = createFileRoute("/scan/$seq")({
@@ -33,23 +43,47 @@ function Scanner() {
   const scan = useScanPackage();
   const [torch, setTorch] = useState(false);
   const [manual, setManual] = useState("");
+  const [showManual, setShowManual] = useState(false);
+  const [rejected, setRejected] = useState<string | null>(null);
+  const [cameraDenied, setCameraDenied] = useState(false);
 
   const next = packages.find((p) => !p.scanned);
   const scanned = packages.filter((p) => p.scanned).length;
   const focus = next ?? packages[packages.length - 1];
+
+  useEffect(() => {
+    let cancelled = false;
+    async function probe() {
+      const perms = (navigator as Navigator & { permissions?: Permissions }).permissions;
+      if (!perms?.query) return;
+      try {
+        const status = await perms.query({ name: "camera" as PermissionName });
+        if (!cancelled) setCameraDenied(status.state === "denied");
+      } catch {
+        /* permission name unsupported — treat as available */
+      }
+    }
+    void probe();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function confirm(code?: string) {
     const target = code
       ? packages.find((p) => p.code.toLowerCase() === code.trim().toLowerCase())
       : next;
     if (!target) {
-      toast.error("Barcode not on this stop's manifest");
+      setRejected(code?.trim() || "unreadable");
       return;
     }
+    setRejected(null);
     await scan.mutateAsync(target.id);
     toast.success(`PKG #${target.code} stowed`);
     setManual("");
+    setShowManual(false);
   }
+
 
   return (
     <AppShell className="flex flex-col">
@@ -72,14 +106,12 @@ function Scanner() {
               <Flashlight className="h-5 w-5" />
             </button>
             <button
-              onClick={() => {
-                const code = window.prompt("Enter parcel barcode");
-                if (code) void confirm(code);
-              }}
+              onClick={() => setShowManual((s) => !s)}
               className="flex h-10 items-center gap-1.5 rounded-full bg-surface-2/90 px-3 text-xs font-bold"
             >
               <Keyboard className="h-4 w-4" /> Manual Entry
             </button>
+
           </div>
         </div>
 
@@ -126,6 +158,56 @@ function Scanner() {
           </span>
         </div>
 
+        {cameraDenied ? <PermissionGate kind="camera" onRetry={() => setShowManual(true)} /> : null}
+
+        {rejected ? (
+          <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-3 py-3">
+            <p className="flex items-center gap-2 text-sm font-bold text-destructive">
+              <TriangleAlert className="h-4 w-4" /> Barcode not on this manifest
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {rejected === "unreadable"
+                ? "Nothing readable in the frame."
+                : `“${rejected}” belongs to another route.`}{" "}
+              Re-scan, key it in, or flag it to dispatch.
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setRejected(null)}
+                className="flex h-11 items-center justify-center rounded-xl border border-border bg-surface-2 text-sm font-bold"
+              >
+                Try scan again
+              </button>
+              <Link
+                to="/help/$seq"
+                params={{ seq }}
+                className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-border bg-surface-2 text-sm font-bold"
+              >
+                <LifeBuoy className="h-4 w-4" /> Report
+              </Link>
+            </div>
+          </div>
+        ) : null}
+
+        {showManual ? (
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+            <input
+              autoFocus
+              value={manual}
+              onChange={(e) => setManual(e.target.value)}
+              placeholder="Enter barcode"
+              className="h-12 rounded-xl border border-border bg-surface-2 px-3 text-sm font-bold outline-none placeholder:text-muted-foreground focus:border-primary"
+            />
+            <button
+              onClick={() => void confirm(manual)}
+              disabled={!manual.trim() || scan.isPending}
+              className="h-12 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground disabled:opacity-50"
+            >
+              Verify
+            </button>
+          </div>
+        ) : null}
+
         {focus ? (
           <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-success/40 bg-surface px-3 py-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/15">
@@ -141,7 +223,11 @@ function Scanner() {
           </div>
         ) : null}
 
-        {next ? (
+        {packages.length === 0 ? (
+          <p className="rounded-xl border border-border bg-surface px-4 py-5 text-center text-sm text-muted-foreground">
+            No parcels are assigned to this stop.
+          </p>
+        ) : next ? (
           <BigButton tone="success" disabled={scan.isPending} onClick={() => confirm()}>
             <Check className="h-5 w-5" /> Confirm Package Stowed
           </BigButton>
@@ -150,7 +236,7 @@ function Scanner() {
             <Check className="h-5 w-5" /> All parcels stowed — Navigate
           </BigButton>
         )}
-        <p className="sr-only">{manual}</p>
+
       </div>
     </AppShell>
   );

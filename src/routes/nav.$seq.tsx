@@ -4,12 +4,14 @@ import {
   CheckCircle2,
   CircleAlert,
   MapPin,
-  PhoneCall,
+  PackageOpen,
   RotateCcw,
+  Satellite,
   Split,
   TriangleAlert,
   X,
 } from "lucide-react";
+
 import { useState } from "react";
 import { toast } from "sonner";
 import { MapCanvas } from "@/components/pulse/map-canvas";
@@ -60,7 +62,18 @@ function NavigationScreen() {
   const [sheet, setSheet] = useState<"none" | "pod" | "exception">("none");
   const [traffic, setTraffic] = useState(false);
   const [rerouted, setRerouted] = useState(false);
+  const [gpsWeak, setGpsWeak] = useState(false);
+  const [confirmFar, setConfirmFar] = useState(false);
   const setStatus = useSetStopStatus();
+  const proximity = gpsWeak ? 184 : 12;
+
+  async function beginProof() {
+    if (!stop) return;
+    await setStatus.mutateAsync({ stopId: stop.id, status: "in_transit" });
+    setConfirmFar(false);
+    setSheet("pod");
+  }
+
 
   if (!stop) {
     return (
@@ -176,11 +189,47 @@ function NavigationScreen() {
               <PhoneCall className="h-4 w-4" /> Call
             </a>
           </div>
+          <button
+            onClick={() => setGpsWeak((g) => !g)}
+            className="flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface-2 text-[11px] font-bold text-muted-foreground"
+          >
+            <Satellite className="h-3.5 w-3.5" />
+            GPS accuracy: {gpsWeak ? `${proximity}m off the door` : `${proximity}m — verified`}
+          </button>
+          {confirmFar ? (
+            <div className="rounded-xl border border-warning/50 bg-warning/10 px-3 py-3">
+              <p className="flex items-center gap-2 text-sm font-bold text-warning">
+                <TriangleAlert className="h-4 w-4" /> You look {proximity}m from this address
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Proof captured this far out can be rejected. Confirm you're at {stop.recipient}'s
+                door, or drive in closer first.
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setConfirmFar(false)}
+                  className="flex h-11 items-center justify-center rounded-xl border border-border bg-surface-2 text-sm font-bold"
+                >
+                  Not yet
+                </button>
+                <button
+                  onClick={() => void beginProof()}
+                  className="flex h-11 items-center justify-center rounded-xl bg-warning text-sm font-bold text-warning-foreground"
+                >
+                  I'm at the door
+                </button>
+              </div>
+            </div>
+          ) : null}
           <BigButton
             tone="warning"
-            onClick={async () => {
-              await setStatus.mutateAsync({ stopId: stop.id, status: "in_transit" });
-              setSheet("pod");
+            disabled={setStatus.isPending}
+            onClick={() => {
+              if (gpsWeak) {
+                setConfirmFar(true);
+                return;
+              }
+              void beginProof();
             }}
           >
             <MapPin className="h-5 w-5" /> Arrived at Stop
@@ -195,8 +244,15 @@ function NavigationScreen() {
       )}
 
       {sheet === "pod" ? (
-        <ProofSheet stop={stop} offline={offline} onClose={() => setSheet("none")} onDone={() => navigate({ to: "/manifest" })} />
+        <ProofSheet
+          stop={stop}
+          offline={offline}
+          proximity={proximity}
+          onClose={() => setSheet("none")}
+          onDone={() => navigate({ to: "/manifest" })}
+        />
       ) : null}
+
       {sheet === "exception" ? (
         <ExceptionSheet stop={stop} offline={offline} onClose={() => setSheet("none")} onDone={() => navigate({ to: "/manifest" })} />
       ) : null}

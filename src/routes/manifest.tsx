@@ -1,14 +1,18 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ChevronRight, CloudOff, Navigation } from "lucide-react";
+import { Bell, CheckCircle2, ChevronRight, CloudOff, Coffee, Inbox, Navigation } from "lucide-react";
 import { AppShell, BigButton, Pill } from "@/components/pulse/shell";
+import { EmptyState, ErrorState, OffShiftState } from "@/components/pulse/states";
 import { MapCanvas } from "@/components/pulse/map-canvas";
 import {
   stopLabel,
+  useActiveShift,
+  useMessages,
   useOfflineMode,
   useQueue,
   useStops,
   type Stop,
 } from "@/lib/pulse-data";
+
 
 export const Route = createFileRoute("/manifest")({
   head: () => ({
@@ -31,27 +35,79 @@ export const Route = createFileRoute("/manifest")({
 
 function ManifestScreen() {
   const navigate = useNavigate();
-  const { data: stops = [], isLoading } = useStops();
+  const { data: stops = [], isLoading, isError, refetch, isFetching } = useStops();
+  const { data: shift, isLoading: shiftLoading } = useActiveShift();
+  const { data: messages = [] } = useMessages();
   const offline = useOfflineMode();
   const queue = useQueue();
+  const unread = messages.filter((m) => !m.read).length;
 
   const active =
     stops.find((s) => s.status === "in_transit") ?? stops.find((s) => s.status === "pending");
   const upcoming = stops.filter((s) => s.status === "pending" && s.id !== active?.id);
   const done = stops.filter((s) => s.status === "completed" || s.status === "exception");
 
+  if (!shiftLoading && !shift) {
+    return (
+      <AppShell bottomNav>
+        <OffShiftState />
+      </AppShell>
+    );
+  }
+
+  if (shift?.status === "paused") {
+    return (
+      <AppShell bottomNav>
+        <div className="px-4 py-6">
+          <EmptyState
+            icon={Coffee}
+            tone="warning"
+            title="You're on a break"
+            body="New stops are paused while you're unavailable. Resume when you're ready to drive."
+            action={
+              <Link to="/break">
+                <BigButton>Open break screen</BigButton>
+              </Link>
+            }
+          />
+        </div>
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell bottomNav className="flex flex-col">
       <div className="relative h-[46vh] min-h-[240px] shrink-0">
         <MapCanvas variant="overview" stopLabel={active ? stopLabel(active.seq) : undefined} />
-        {offline ? (
-          <Link
-            to="/offline"
-            className="safe-top absolute inset-x-0 top-0 mx-3 flex items-center gap-2 rounded-xl border border-warning/50 bg-card/95 px-3 py-2 text-xs font-bold text-warning backdrop-blur"
-          >
-            <CloudOff className="h-4 w-4" /> Offline mode • {queue.length} queued locally
-          </Link>
-        ) : null}
+        <div className="safe-top absolute inset-x-0 top-0 mx-3 space-y-2">
+          {offline ? (
+            <Link
+              to="/offline"
+              className="flex items-center gap-2 rounded-xl border border-warning/50 bg-card/95 px-3 py-2 text-xs font-bold text-warning backdrop-blur"
+            >
+              <CloudOff className="h-4 w-4" /> Offline mode • {queue.length} queued locally
+            </Link>
+          ) : null}
+          <div className="flex items-center gap-2">
+            <Link
+              to="/notifications"
+              aria-label="Dispatch messages"
+              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/95 backdrop-blur"
+            >
+              <Bell className="h-5 w-5 text-muted-foreground" />
+              {unread ? (
+                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-warning" />
+              ) : null}
+            </Link>
+            <Link
+              to="/break"
+              aria-label="Take a break"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/95 backdrop-blur"
+            >
+              <Coffee className="h-5 w-5 text-muted-foreground" />
+            </Link>
+          </div>
+        </div>
       </div>
 
       <div className="-mt-6 flex-1 rounded-t-3xl border-t border-border bg-background px-3 pt-2 pb-4">
@@ -60,6 +116,29 @@ function ManifestScreen() {
         {isLoading ? (
           <p className="px-2 py-8 text-center text-sm text-muted-foreground">Loading manifest…</p>
         ) : null}
+
+        {isError ? (
+          <ErrorState
+            title="Manifest didn't load"
+            body="Dispatch didn't answer. Your queued work is safe on the device."
+            onRetry={() => refetch()}
+            retrying={isFetching}
+          />
+        ) : null}
+
+        {!isLoading && !isError && stops.length === 0 ? (
+          <EmptyState
+            icon={Inbox}
+            title="No manifest assigned"
+            body="Dispatch hasn't released stops for van #408 yet. Pull a refresh once they do."
+            action={
+              <BigButton tone="ghost" onClick={() => refetch()} disabled={isFetching}>
+                Refresh manifest
+              </BigButton>
+            }
+          />
+        ) : null}
+
 
         {active ? (
           <section className="rounded-2xl border border-border bg-surface p-4">
@@ -115,14 +194,21 @@ function ManifestScreen() {
           </>
         ) : null}
 
-        {!upcoming.length && !active ? (
-          <div className="mt-4 rounded-2xl border border-success/40 bg-success/10 p-4 text-center">
-            <p className="font-bold text-success">All stops cleared</p>
-            <Link to="/summary" className="mt-1 block text-sm text-muted-foreground underline">
-              Review shift summary
-            </Link>
-          </div>
+        {!upcoming.length && !active && stops.length ? (
+          <EmptyState
+            className="mt-4"
+            icon={CheckCircle2}
+            tone="success"
+            title={`Route complete — ${done.length} of ${stops.length} cleared`}
+            body="Every stop on manifest #RT-8842 is closed out. Review the shift and clock out."
+            action={
+              <Link to="/summary">
+                <BigButton tone="success">Review shift summary</BigButton>
+              </Link>
+            }
+          />
         ) : null}
+
       </div>
     </AppShell>
   );

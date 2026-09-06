@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       delivery_events: {
         Row: {
+          attempt: number
           created_at: string
           event_type: string
           gps: string | null
@@ -29,6 +30,7 @@ export type Database = {
           stop_id: string | null
         }
         Insert: {
+          attempt?: number
           created_at?: string
           event_type: string
           gps?: string | null
@@ -42,6 +44,7 @@ export type Database = {
           stop_id?: string | null
         }
         Update: {
+          attempt?: number
           created_at?: string
           event_type?: string
           gps?: string | null
@@ -71,30 +74,128 @@ export type Database = {
           },
         ]
       }
+      dispatch_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          read: boolean
+          stop_id: string | null
+          title: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          kind?: string
+          read?: boolean
+          stop_id?: string | null
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          read?: boolean
+          stop_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispatch_messages_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "stops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drivers: {
+        Row: {
+          avatar_path: string | null
+          company: string
+          created_at: string
+          display_name: string
+          driver_code: string
+          emergency_contact: string | null
+          haptics: boolean
+          id: string
+          language: string
+          nav_preference: string
+          phone: string | null
+          torch_default: boolean
+          units: string
+          updated_at: string
+          vehicle: string
+        }
+        Insert: {
+          avatar_path?: string | null
+          company?: string
+          created_at?: string
+          display_name: string
+          driver_code: string
+          emergency_contact?: string | null
+          haptics?: boolean
+          id?: string
+          language?: string
+          nav_preference?: string
+          phone?: string | null
+          torch_default?: boolean
+          units?: string
+          updated_at?: string
+          vehicle?: string
+        }
+        Update: {
+          avatar_path?: string | null
+          company?: string
+          created_at?: string
+          display_name?: string
+          driver_code?: string
+          emergency_contact?: string | null
+          haptics?: boolean
+          id?: string
+          language?: string
+          nav_preference?: string
+          phone?: string | null
+          torch_default?: boolean
+          units?: string
+          updated_at?: string
+          vehicle?: string
+        }
+        Relationships: []
+      }
       packages: {
         Row: {
           code: string
+          delivered: boolean
           description: string | null
           id: string
           kind: string
+          returned: boolean
           scanned: boolean
           stop_id: string
           weight_lbs: number | null
         }
         Insert: {
           code: string
+          delivered?: boolean
           description?: string | null
           id?: string
           kind: string
+          returned?: boolean
           scanned?: boolean
           stop_id: string
           weight_lbs?: number | null
         }
         Update: {
           code?: string
+          delivered?: boolean
           description?: string | null
           id?: string
           kind?: string
+          returned?: boolean
           scanned?: boolean
           stop_id?: string
           weight_lbs?: number | null
@@ -111,6 +212,8 @@ export type Database = {
       }
       shifts: {
         Row: {
+          break_seconds: number
+          break_started_at: string | null
           driver_code: string
           driver_name: string
           ended_at: string | null
@@ -123,6 +226,8 @@ export type Database = {
           vehicle: string
         }
         Insert: {
+          break_seconds?: number
+          break_started_at?: string | null
           driver_code: string
           driver_name: string
           ended_at?: string | null
@@ -135,6 +240,8 @@ export type Database = {
           vehicle: string
         }
         Update: {
+          break_seconds?: number
+          break_started_at?: string | null
           driver_code?: string
           driver_name?: string
           ended_at?: string | null

@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CloudOff, RefreshCw, Wifi } from "lucide-react";
+import { CheckCheck, CloudOff, RefreshCw, Wifi } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AppShell, BigButton, Pill, ScreenHeader } from "@/components/pulse/shell";
+import { EmptyState } from "@/components/pulse/states";
 import {
   setOfflineMode,
   stopLabel,
@@ -10,6 +12,9 @@ import {
   useStops,
   useSyncQueue,
 } from "@/lib/pulse-data";
+
+const LAST_SYNC_KEY = "pulseroute.lastSync.v1";
+
 
 export const Route = createFileRoute("/offline")({
   head: () => ({
@@ -36,6 +41,12 @@ function OfflineScreen() {
   const sync = useSyncQueue();
   const { data: stops = [] } = useStops();
   const active = stops.find((s) => s.status === "in_transit");
+  const [lastSync, setLastSync] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLastSync(window.localStorage.getItem(LAST_SYNC_KEY));
+  }, [queue.length]);
+
 
   return (
     <AppShell bottomNav className="flex flex-col">
@@ -65,10 +76,18 @@ function OfflineScreen() {
         </div>
 
         {queue.length === 0 ? (
-          <p className="rounded-xl border border-border bg-surface px-4 py-6 text-center text-sm text-muted-foreground">
-            Nothing queued. Completed drop-offs are synced to dispatch.
-          </p>
+          <EmptyState
+            icon={CheckCheck}
+            tone="success"
+            title="Everything synced"
+            body={
+              lastSync
+                ? `Last synced with dispatch at ${new Date(lastSync).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}. Nothing is waiting on the device.`
+                : "Nothing is waiting on the device. Completed drop-offs go straight to dispatch."
+            }
+          />
         ) : (
+
           <ul className="space-y-2">
             {queue.map((item) => (
               <li
@@ -118,9 +137,17 @@ function OfflineScreen() {
           tone={offline ? "ghost" : "success"}
           disabled={offline || queue.length === 0 || sync.isPending}
           onClick={async () => {
-            const count = await sync.mutateAsync();
-            toast.success(`${count} drop-off${count === 1 ? "" : "s"} synced to dispatch`);
+            try {
+              const count = await sync.mutateAsync();
+              const now = new Date().toISOString();
+              window.localStorage.setItem(LAST_SYNC_KEY, now);
+              setLastSync(now);
+              toast.success(`${count} drop-off${count === 1 ? "" : "s"} synced to dispatch`);
+            } catch {
+              toast.error("Sync failed — your drop-offs stay queued on the device.");
+            }
           }}
+
         >
           <RefreshCw className={`h-5 w-5 ${sync.isPending ? "animate-spin" : ""}`} />
           {offline ? "Syncing Paused until Network Restored" : "Sync Queue Now"}

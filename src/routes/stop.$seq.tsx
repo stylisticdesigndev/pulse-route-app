@@ -2,17 +2,20 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   CheckCircle2,
+  LifeBuoy,
   Lock,
   MapPin,
   MessageSquare,
   Navigation,
   PhoneCall,
+  RotateCcw,
   ScanLine,
   TriangleAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, BigButton, Pill, ScreenHeader } from "@/components/pulse/shell";
-import { stopLabel, usePackages, useStops } from "@/lib/pulse-data";
+import { stopLabel, usePackages, useReattemptStop, useStops } from "@/lib/pulse-data";
+
 
 export const Route = createFileRoute("/stop/$seq")({
   head: () => ({
@@ -39,6 +42,8 @@ function StopDetail() {
   const { data: stops = [] } = useStops();
   const stop = stops.find((s) => String(s.seq) === seq);
   const { data: packages = [] } = usePackages(stop?.id);
+  const reattempt = useReattemptStop();
+
 
   if (!stop) {
     return (
@@ -168,11 +173,35 @@ function StopDetail() {
         </section>
       </div>
 
-      <div className="safe-bottom mt-auto border-t border-border/70 bg-background px-4 pt-3">
+      <div className="safe-bottom mt-auto space-y-2 border-t border-border/70 bg-background px-4 pt-3">
+        {stop.status === "exception" ? (
+          <BigButton
+            tone="warning"
+            disabled={reattempt.isPending}
+            onClick={async () => {
+              await reattempt.mutateAsync({
+                stopId: stop.id,
+                nextSeq: Math.max(...stops.map((s) => s.seq)) + 1,
+              });
+              toast.success(`${stop.recipient} moved to the end of the route for a retry`);
+            }}
+          >
+
+            <RotateCcw className="h-5 w-5" /> Reattempt This Stop
+          </BigButton>
+        ) : null}
         <BigButton onClick={() => navigate({ to: "/nav/$seq", params: { seq } })}>
           <Navigation className="h-5 w-5" /> Launch Turn-by-Turn Navigation
         </BigButton>
+        <Link
+          to="/help/$seq"
+          params={{ seq }}
+          className="flex h-12 items-center justify-center gap-2 rounded-xl border border-border bg-surface-2 text-sm font-bold"
+        >
+          <LifeBuoy className="h-4 w-4" /> Need help at this stop?
+        </Link>
       </div>
+
     </AppShell>
   );
 }
