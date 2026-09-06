@@ -20,7 +20,7 @@ export type QueuedEvent = {
   stopSeq: number;
   stopId: string;
   recipient: string;
-  eventType: "delivered" | "exception";
+  eventType: "delivered" | "exception" | "partial";
   reason: string | null;
   signature_path: string | null;
   photo_captured: boolean;
