@@ -12,6 +12,8 @@ import {
   useStops,
   type Stop,
 } from "@/lib/pulse-data";
+import { useRole } from "@/lib/role-context";
+import { FleetOverview } from "@/components/pulse/fleet-overview";
 
 
 export const Route = createFileRoute("/manifest")({
@@ -35,6 +37,7 @@ export const Route = createFileRoute("/manifest")({
 
 function ManifestScreen() {
   const navigate = useNavigate();
+  const { activeRole } = useRole();
   const { data: stops = [], isLoading, isError, refetch, isFetching } = useStops();
   const { data: shift, isLoading: shiftLoading } = useActiveShift();
   const { data: messages = [] } = useMessages();
@@ -46,6 +49,10 @@ function ManifestScreen() {
     stops.find((s) => s.status === "in_transit") ?? stops.find((s) => s.status === "pending");
   const upcoming = stops.filter((s) => s.status === "pending" && s.id !== active?.id);
   const done = stops.filter((s) => s.status === "completed" || s.status === "exception");
+
+  if (activeRole === "dispatch_supervisor") {
+    return <FleetOverview />;
+  }
 
   if (!shiftLoading && !shift) {
     return (
