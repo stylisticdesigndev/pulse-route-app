@@ -35,6 +35,7 @@ export const Route = createFileRoute("/manifest")({
 
 function ManifestScreen() {
   const navigate = useNavigate();
+  const { activeRole } = useRole();
   const { data: stops = [], isLoading, isError, refetch, isFetching } = useStops();
   const { data: shift, isLoading: shiftLoading } = useActiveShift();
   const { data: messages = [] } = useMessages();
