@@ -11,6 +11,7 @@ import {
   useQueue,
   useStops,
   type Stop,
+  type StopWithRoute,
 } from "@/lib/pulse-data";
 import { useRole } from "@/lib/role-context";
 import { FleetOverview } from "@/components/pulse/fleet-overview";
@@ -229,7 +230,7 @@ function ManifestScreen() {
   );
 }
 
-function StopRow({ stop }: { stop: Stop }) {
+function StopRow({ stop }: { stop: Stop | StopWithRoute }) {
   const done = stop.status === "completed";
   const failed = stop.status === "exception";
   return (
