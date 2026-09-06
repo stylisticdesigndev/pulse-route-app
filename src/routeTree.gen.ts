@@ -25,6 +25,7 @@ import { Route as SummaryRouteImport } from './routes/summary'
 import { Route as HelpSeqRouteImport } from './routes/help_.$seq'
 import { Route as HistoryIdRouteImport } from './routes/history_.$id'
 import { Route as NavSeqRouteImport } from './routes/nav.$seq'
+import { Route as ProfileEditRouteImport } from './routes/profile_.edit'
 import { Route as ScanSeqRouteImport } from './routes/scan.$seq'
 import { Route as StopSeqRouteImport } from './routes/stop.$seq'
 
@@ -108,6 +109,11 @@ const NavSeqRoute = NavSeqRouteImport.update({
   path: '/nav/$seq',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileEditRoute = ProfileEditRouteImport.update({
+  id: '/profile_/edit',
+  path: '/profile/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ScanSeqRoute = ScanSeqRouteImport.update({
   id: '/scan/$seq',
   path: '/scan/$seq',
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/help/$seq': typeof HelpSeqRoute
   '/history/$id': typeof HistoryIdRoute
   '/nav/$seq': typeof NavSeqRoute
+  '/profile/edit': typeof ProfileEditRoute
   '/scan/$seq': typeof ScanSeqRoute
   '/stop/$seq': typeof StopSeqRoute
 }
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/help/$seq': typeof HelpSeqRoute
   '/history/$id': typeof HistoryIdRoute
   '/nav/$seq': typeof NavSeqRoute
+  '/profile/edit': typeof ProfileEditRoute
   '/scan/$seq': typeof ScanSeqRoute
   '/stop/$seq': typeof StopSeqRoute
 }
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/help_/$seq': typeof HelpSeqRoute
   '/history_/$id': typeof HistoryIdRoute
   '/nav/$seq': typeof NavSeqRoute
+  '/profile_/edit': typeof ProfileEditRoute
   '/scan/$seq': typeof ScanSeqRoute
   '/stop/$seq': typeof StopSeqRoute
 }
@@ -199,6 +208,7 @@ export interface FileRouteTypes {
     | '/help/$seq'
     | '/history/$id'
     | '/nav/$seq'
+    | '/profile/edit'
     | '/scan/$seq'
     | '/stop/$seq'
   fileRoutesByTo: FileRoutesByTo
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/help/$seq'
     | '/history/$id'
     | '/nav/$seq'
+    | '/profile/edit'
     | '/scan/$seq'
     | '/stop/$seq'
   id:
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/help_/$seq'
     | '/history_/$id'
     | '/nav/$seq'
+    | '/profile_/edit'
     | '/scan/$seq'
     | '/stop/$seq'
   fileRoutesById: FileRoutesById
@@ -260,6 +272,7 @@ export interface RootRouteChildren {
   HelpSeqRoute: typeof HelpSeqRoute
   HistoryIdRoute: typeof HistoryIdRoute
   NavSeqRoute: typeof NavSeqRoute
+  ProfileEditRoute: typeof ProfileEditRoute
   ScanSeqRoute: typeof ScanSeqRoute
   StopSeqRoute: typeof StopSeqRoute
 }
@@ -378,6 +391,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NavSeqRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile_/edit': {
+      id: '/profile_/edit'
+      path: '/profile/edit'
+      fullPath: '/profile/edit'
+      preLoaderRoute: typeof ProfileEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/scan/$seq': {
       id: '/scan/$seq'
       path: '/scan/$seq'
@@ -412,6 +432,7 @@ const rootRouteChildren: RootRouteChildren = {
   HelpSeqRoute: HelpSeqRoute,
   HistoryIdRoute: HistoryIdRoute,
   NavSeqRoute: NavSeqRoute,
+  ProfileEditRoute: ProfileEditRoute,
   ScanSeqRoute: ScanSeqRoute,
   StopSeqRoute: StopSeqRoute,
 }
