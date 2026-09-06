@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      deliveries: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          dropoff_latitude: number | null
+          dropoff_longitude: number | null
+          failure_reason: string | null
+          id: string
+          photo_url: string | null
+          signature_url: string | null
+          status: Database["public"]["Enums"]["delivery_status"]
+          stop_id: string
+          tracking_number: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          dropoff_latitude?: number | null
+          dropoff_longitude?: number | null
+          failure_reason?: string | null
+          id?: string
+          photo_url?: string | null
+          signature_url?: string | null
+          status?: Database["public"]["Enums"]["delivery_status"]
+          stop_id: string
+          tracking_number: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          dropoff_latitude?: number | null
+          dropoff_longitude?: number | null
+          failure_reason?: string | null
+          id?: string
+          photo_url?: string | null
+          signature_url?: string | null
+          status?: Database["public"]["Enums"]["delivery_status"]
+          stop_id?: string
+          tracking_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliveries_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "stops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       delivery_events: {
         Row: {
           attempt: number
@@ -166,6 +216,54 @@ export type Database = {
         }
         Relationships: []
       }
+      location_logs: {
+        Row: {
+          driver_id: string
+          heading_degrees: number | null
+          id: number
+          latitude: number
+          longitude: number
+          recorded_at: string
+          route_id: string | null
+          speed_mph: number | null
+        }
+        Insert: {
+          driver_id: string
+          heading_degrees?: number | null
+          id?: number
+          latitude: number
+          longitude: number
+          recorded_at?: string
+          route_id?: string | null
+          speed_mph?: number | null
+        }
+        Update: {
+          driver_id?: string
+          heading_degrees?: number | null
+          id?: number
+          latitude?: number
+          longitude?: number
+          recorded_at?: string
+          route_id?: string | null
+          speed_mph?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_logs_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "location_logs_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       packages: {
         Row: {
           code: string
@@ -206,6 +304,84 @@ export type Database = {
             columns: ["stop_id"]
             isOneToOne: false
             referencedRelation: "stops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          phone_number: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          vehicle_identifier: string | null
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id: string
+          phone_number?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          vehicle_identifier?: string | null
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone_number?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          vehicle_identifier?: string | null
+        }
+        Relationships: []
+      }
+      routes: {
+        Row: {
+          code: string | null
+          created_at: string
+          dispatcher_id: string | null
+          driver_id: string | null
+          estimated_duration_minutes: number | null
+          id: string
+          scheduled_date: string
+          status: Database["public"]["Enums"]["route_status"]
+          total_distance_miles: number | null
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          dispatcher_id?: string | null
+          driver_id?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          scheduled_date?: string
+          status?: Database["public"]["Enums"]["route_status"]
+          total_distance_miles?: number | null
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          dispatcher_id?: string | null
+          driver_id?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          scheduled_date?: string
+          status?: Database["public"]["Enums"]["route_status"]
+          total_distance_miles?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routes_dispatcher_id_fkey"
+            columns: ["dispatcher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "routes_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -257,70 +433,116 @@ export type Database = {
       }
       stops: {
         Row: {
+          access_notes: string | null
           address: string
+          address_line1: string | null
+          city: string | null
           completed_at: string | null
           created_at: string
+          delivery_window_end: string | null
+          delivery_window_start: string | null
           distance_km: number
           drop_instruction: string | null
           eta: string | null
           gate_code: string | null
           hazard_warning: string | null
           id: string
+          latitude: number | null
+          longitude: number | null
           phone: string | null
           recipient: string
+          recipient_name: string | null
+          route_id: string | null
           sector: string | null
           seq: number
+          sequence_order: number | null
+          state: string | null
           status: string
           window_end: string
           window_start: string
+          zip_code: string | null
         }
         Insert: {
+          access_notes?: string | null
           address: string
+          address_line1?: string | null
+          city?: string | null
           completed_at?: string | null
           created_at?: string
+          delivery_window_end?: string | null
+          delivery_window_start?: string | null
           distance_km?: number
           drop_instruction?: string | null
           eta?: string | null
           gate_code?: string | null
           hazard_warning?: string | null
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           phone?: string | null
           recipient: string
+          recipient_name?: string | null
+          route_id?: string | null
           sector?: string | null
           seq: number
+          sequence_order?: number | null
+          state?: string | null
           status?: string
           window_end: string
           window_start: string
+          zip_code?: string | null
         }
         Update: {
+          access_notes?: string | null
           address?: string
+          address_line1?: string | null
+          city?: string | null
           completed_at?: string | null
           created_at?: string
+          delivery_window_end?: string | null
+          delivery_window_start?: string | null
           distance_km?: number
           drop_instruction?: string | null
           eta?: string | null
           gate_code?: string | null
           hazard_warning?: string | null
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           phone?: string | null
           recipient?: string
+          recipient_name?: string | null
+          route_id?: string | null
           sector?: string | null
           seq?: number
+          sequence_order?: number | null
+          state?: string | null
           status?: string
           window_end?: string
           window_start?: string
+          zip_code?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "stops_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_dispatch_supervisor: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      delivery_status: "pending" | "in_transit" | "delivered" | "failed"
+      route_status: "draft" | "assigned" | "active" | "completed"
+      user_role: "dispatch_supervisor" | "field_technician"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -447,6 +669,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      delivery_status: ["pending", "in_transit", "delivered", "failed"],
+      route_status: ["draft", "assigned", "active", "completed"],
+      user_role: ["dispatch_supervisor", "field_technician"],
+    },
   },
 } as const
