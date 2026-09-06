@@ -184,8 +184,9 @@ function StopDetail() {
                 nextSeq: Math.max(...stops.map((s) => s.seq)) + 1,
               });
               toast.success(`${stop.recipient} moved to the end of the route for a retry`);
-
+            }}
           >
+
             <RotateCcw className="h-5 w-5" /> Reattempt This Stop
           </BigButton>
         ) : null}
