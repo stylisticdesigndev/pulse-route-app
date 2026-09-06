@@ -131,6 +131,7 @@ export type Database = {
           id: string
           kind: string
           read: boolean
+          recipient_id: string | null
           stop_id: string | null
           title: string
         }
@@ -140,6 +141,7 @@ export type Database = {
           id?: string
           kind?: string
           read?: boolean
+          recipient_id?: string | null
           stop_id?: string | null
           title: string
         }
@@ -149,10 +151,18 @@ export type Database = {
           id?: string
           kind?: string
           read?: boolean
+          recipient_id?: string | null
           stop_id?: string | null
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "dispatch_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dispatch_messages_stop_id_fkey"
             columns: ["stop_id"]
@@ -178,6 +188,7 @@ export type Database = {
           torch_default: boolean
           units: string
           updated_at: string
+          user_id: string | null
           vehicle: string
         }
         Insert: {
@@ -195,6 +206,7 @@ export type Database = {
           torch_default?: boolean
           units?: string
           updated_at?: string
+          user_id?: string | null
           vehicle?: string
         }
         Update: {
@@ -212,9 +224,18 @@ export type Database = {
           torch_default?: boolean
           units?: string
           updated_at?: string
+          user_id?: string | null
           vehicle?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "drivers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       location_logs: {
         Row: {
@@ -392,6 +413,7 @@ export type Database = {
           break_started_at: string | null
           driver_code: string
           driver_name: string
+          driver_user_id: string | null
           ended_at: string | null
           id: string
           manifest_code: string
@@ -406,6 +428,7 @@ export type Database = {
           break_started_at?: string | null
           driver_code: string
           driver_name: string
+          driver_user_id?: string | null
           ended_at?: string | null
           id?: string
           manifest_code: string
@@ -420,6 +443,7 @@ export type Database = {
           break_started_at?: string | null
           driver_code?: string
           driver_name?: string
+          driver_user_id?: string | null
           ended_at?: string | null
           id?: string
           manifest_code?: string
@@ -429,7 +453,15 @@ export type Database = {
           status?: string
           vehicle?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "shifts_driver_user_id_fkey"
+            columns: ["driver_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stops: {
         Row: {
@@ -537,7 +569,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_profile_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
+      is_apex_staff: { Args: { _user_id: string }; Returns: boolean }
       is_dispatch_supervisor: { Args: { _user_id: string }; Returns: boolean }
+      mark_dispatch_messages_read: { Args: never; Returns: undefined }
+      owns_fleet_object: {
+        Args: { _bucket: string; _name: string }
+        Returns: boolean
+      }
     }
     Enums: {
       delivery_status: "pending" | "in_transit" | "delivered" | "failed"

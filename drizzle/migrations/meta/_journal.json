@@ -36,6 +36,55 @@
       "when": 1788731881985,
       "tag": "0004_proof_of_service_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788733349517,
+      "tag": "0005_harden_rls_and_storage",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788733541840,
+      "tag": "0006_tighten_staff_role_check",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788733609772,
+      "tag": "0007_scope_staff_access_to_owner",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788733689097,
+      "tag": "0008_lock_profile_role_and_dispatch_sender",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788733699346,
+      "tag": "0009_allow_driver_self_dispatch_note",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1788733789751,
+      "tag": "0010_fix_packages_update_check",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1788733825613,
+      "tag": "0011_dispatch_read_rpc",
+      "breakpoints": true
     }
   ]
 }

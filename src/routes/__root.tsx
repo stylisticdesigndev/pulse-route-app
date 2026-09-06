@@ -4,6 +4,8 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
+  useNavigate,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -15,6 +17,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { RoleProvider } from "@/lib/role-context";
 import { RoleSwitcher } from "@/components/pulse/role-switcher";
 import { registerServiceWorker } from "@/lib/register-sw";
+import { useSession } from "@/lib/auth-session";
 
 function NotFoundComponent() {
   return (
@@ -145,11 +148,37 @@ function RootComponent() {
 
     <QueryClientProvider client={queryClient}>
       <RoleProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <RoleSwitcher />
+        <AuthGate>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+          <RoleSwitcher />
+        </AuthGate>
       </RoleProvider>
       <Toaster position="top-center" theme="dark" richColors />
     </QueryClientProvider>
   );
+}
+
+/** Keeps every operational screen behind a signed-in Apex staff session. */
+function AuthGate({ children }: { children: ReactNode }) {
+  const { session, ready } = useSession();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const navigate = useNavigate();
+  const isAuthRoute = pathname === "/auth";
+
+  useEffect(() => {
+    if (!ready) return;
+    if (!session && !isAuthRoute) navigate({ to: "/auth", replace: true });
+    if (session && isAuthRoute) navigate({ to: "/", replace: true });
+  }, [ready, session, isAuthRoute, navigate]);
+
+  if (isAuthRoute) return <>{children}</>;
+  if (!ready || !session) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
+      </div>
+    );
+  }
+  return <>{children}</>;
 }

@@ -423,10 +423,7 @@ export function useMarkMessagesRead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from("dispatch_messages")
-        .update({ read: true })
-        .eq("read", false);
+      const { error } = await supabase.rpc("mark_dispatch_messages_read");
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["messages"] }),
@@ -557,9 +554,14 @@ export function useSendDispatchNote() {
       stopId?: string | null;
       kind?: string;
     }) => {
-      const { error } = await supabase
-        .from("dispatch_messages")
-        .insert({ title, body, stop_id: stopId ?? null, kind });
+      const { data: auth } = await supabase.auth.getUser();
+      const { error } = await supabase.from("dispatch_messages").insert({
+        title,
+        body,
+        stop_id: stopId ?? null,
+        kind,
+        recipient_id: auth.user?.id ?? null,
+      });
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["messages"] }),
