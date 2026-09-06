@@ -145,9 +145,11 @@ function RootComponent() {
 
     <QueryClientProvider client={queryClient}>
       <RoleProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <RoleSwitcher />
+        <AuthGate>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+          <RoleSwitcher />
+        </AuthGate>
       </RoleProvider>
       <Toaster position="top-center" theme="dark" richColors />
     </QueryClientProvider>
