@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { RoleProvider } from "@/lib/role-context";
 import { RoleSwitcher } from "@/components/pulse/role-switcher";
+import { registerServiceWorker } from "@/lib/register-sw";
 
 function NotFoundComponent() {
   return (
