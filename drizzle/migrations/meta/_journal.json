@@ -71,6 +71,13 @@
       "when": 1788733699346,
       "tag": "0009_allow_driver_self_dispatch_note",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1788733789751,
+      "tag": "0010_fix_packages_update_check",
+      "breakpoints": true
     }
   ]
 }
