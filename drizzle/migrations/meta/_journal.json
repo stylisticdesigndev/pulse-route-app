@@ -64,6 +64,13 @@
       "when": 1788733689097,
       "tag": "0008_lock_profile_role_and_dispatch_sender",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788733699346,
+      "tag": "0009_allow_driver_self_dispatch_note",
+      "breakpoints": true
     }
   ]
 }
