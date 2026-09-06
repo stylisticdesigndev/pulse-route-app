@@ -60,7 +60,18 @@ function NavigationScreen() {
   const [sheet, setSheet] = useState<"none" | "pod" | "exception">("none");
   const [traffic, setTraffic] = useState(false);
   const [rerouted, setRerouted] = useState(false);
+  const [gpsWeak, setGpsWeak] = useState(false);
+  const [confirmFar, setConfirmFar] = useState(false);
   const setStatus = useSetStopStatus();
+  const proximity = gpsWeak ? 184 : 12;
+
+  async function beginProof() {
+    if (!stop) return;
+    await setStatus.mutateAsync({ stopId: stop.id, status: "in_transit" });
+    setConfirmFar(false);
+    setSheet("pod");
+  }
+
 
   if (!stop) {
     return (
