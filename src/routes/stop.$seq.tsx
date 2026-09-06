@@ -2,17 +2,20 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   CheckCircle2,
+  LifeBuoy,
   Lock,
   MapPin,
   MessageSquare,
   Navigation,
   PhoneCall,
+  RotateCcw,
   ScanLine,
   TriangleAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, BigButton, Pill, ScreenHeader } from "@/components/pulse/shell";
-import { stopLabel, usePackages, useStops } from "@/lib/pulse-data";
+import { stopLabel, usePackages, useReattemptStop, useStops } from "@/lib/pulse-data";
+
 
 export const Route = createFileRoute("/stop/$seq")({
   head: () => ({
