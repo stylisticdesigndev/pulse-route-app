@@ -20,7 +20,7 @@ export type QueuedEvent = {
   stopSeq: number;
   stopId: string;
   recipient: string;
-  eventType: "delivered" | "exception";
+  eventType: "delivered" | "exception" | "partial";
   reason: string | null;
   signature_path: string | null;
   photo_captured: boolean;
@@ -222,7 +222,7 @@ async function pushEvent(event: SubmitInput, shiftId: string | null) {
   const { error: stopError } = await supabase
     .from("stops")
     .update({
-      status: event.eventType === "delivered" ? "completed" : "exception",
+      status: event.eventType === "exception" ? "exception" : "completed",
       completed_at: new Date().toISOString(),
     })
     .eq("id", event.stopId);

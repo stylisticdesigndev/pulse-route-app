@@ -5,12 +5,14 @@ import {
   CircleAlert,
   MapPin,
   PackageOpen,
+  PhoneCall,
   RotateCcw,
   Satellite,
   Split,
   TriangleAlert,
   X,
 } from "lucide-react";
+
 
 import { useState } from "react";
 import { toast } from "sonner";
@@ -299,34 +301,48 @@ function SheetFrame({
 function ProofSheet({
   stop,
   offline,
+  proximity,
   onClose,
   onDone,
 }: {
   stop: Stop;
   offline: boolean;
+  proximity: number;
   onClose: () => void;
   onDone: () => void;
 }) {
   const [photo, setPhoto] = useState(false);
   const [signature, setSignature] = useState<string | null>(null);
+  const [partial, setPartial] = useState(false);
+  const [failed, setFailed] = useState(false);
   const submit = useSubmitEvent();
+  const near = proximity <= 50;
 
   async function complete() {
-    const result = await submit.mutateAsync({
-      stopId: stop.id,
-      stopSeq: stop.seq,
-      recipient: stop.recipient,
-      eventType: "delivered",
-      reason: null,
-      signature_path: signature,
-      photo_captured: photo,
-      proximity_m: 12,
-      gps: "37.7749,-122.4194",
-    });
-    toast.success(
-      result.queued ? "Drop-off queued offline — will sync on reconnect" : "Drop-off synced to dispatch",
-    );
-    onDone();
+    try {
+      setFailed(false);
+      const result = await submit.mutateAsync({
+        stopId: stop.id,
+        stopSeq: stop.seq,
+        recipient: stop.recipient,
+        eventType: partial ? "partial" : "delivered",
+        reason: partial ? "Partial delivery — remaining parcels returning to depot" : null,
+        signature_path: signature,
+        photo_captured: photo,
+        proximity_m: proximity,
+        gps: "37.7749,-122.4194",
+      });
+      toast.success(
+        result.queued
+          ? "Drop-off queued offline — will sync on reconnect"
+          : partial
+            ? "Partial delivery synced • Remainder flagged for depot"
+            : "Drop-off synced to dispatch",
+      );
+      onDone();
+    } catch {
+      setFailed(true);
+    }
   }
 
   return (
@@ -341,19 +357,71 @@ function ProofSheet({
         <span className="mt-3 block text-sm font-bold">
           {photo ? "Parcel photo captured" : "Tap to Capture Parcel Photo"}
         </span>
-        <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-success/15 px-3 py-1 text-[11px] font-bold text-success">
-          <CheckCircle2 className="h-3.5 w-3.5" /> Proximity Verified: 12m away
+        <span
+          className={`mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold ${
+            near ? "bg-success/15 text-success" : "bg-warning/15 text-warning"
+          }`}
+        >
+          {near ? <CheckCircle2 className="h-3.5 w-3.5" /> : <TriangleAlert className="h-3.5 w-3.5" />}
+          {near ? `Proximity Verified: ${proximity}m away` : `Off-location: ${proximity}m from door`}
         </span>
+      </button>
+
+      <button
+        onClick={() => setPartial((p) => !p)}
+        className={`mt-3 grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border px-3 py-3 text-left ${
+          partial ? "border-warning bg-warning/10" : "border-border bg-surface"
+        }`}
+      >
+        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning/15">
+          <PackageOpen className="h-5 w-5 text-warning" />
+        </span>
+        <span className="min-w-0">
+          <span className="block truncate text-sm font-bold">Partial delivery</span>
+          <span className="block truncate text-xs text-muted-foreground">
+            Recipient accepted some parcels — rest return to depot
+          </span>
+        </span>
+        <span className={`h-3.5 w-3.5 rounded-full ${partial ? "bg-warning" : "bg-muted-foreground/40"}`} />
       </button>
 
       <div className="mt-3">
         <SignaturePad onChange={setSignature} />
       </div>
 
+      {failed ? (
+        <div className="mt-3 rounded-xl border border-destructive/40 bg-destructive/10 px-3 py-3 text-center">
+          <p className="text-sm font-bold text-destructive">Proof didn't reach dispatch</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Nothing was lost. Retry now, or keep it on the device and sync later.
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button
+              onClick={complete}
+              className="flex h-11 items-center justify-center rounded-xl border border-border bg-surface-2 text-sm font-bold"
+            >
+              Retry
+            </button>
+            <Link
+              to="/offline"
+              className="flex h-11 items-center justify-center rounded-xl border border-border bg-surface-2 text-sm font-bold"
+            >
+              Open queue
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
       <div className="mt-4">
         <BigButton tone="success" disabled={!signature || !photo || submit.isPending} onClick={complete}>
           <CheckCircle2 className="h-5 w-5" />
-          {offline ? "Complete & Queue Drop-Off" : "Complete & Sync Drop-Off"}
+          {offline
+            ? partial
+              ? "Queue Partial Drop-Off"
+              : "Complete & Queue Drop-Off"
+            : partial
+              ? "Complete Partial Drop-Off"
+              : "Complete & Sync Drop-Off"}
         </BigButton>
         {!signature || !photo ? (
           <p className="mt-2 text-center text-xs text-muted-foreground">
@@ -361,6 +429,7 @@ function ProofSheet({
           </p>
         ) : null}
       </div>
+
     </SheetFrame>
   );
 }
