@@ -137,9 +137,17 @@ function OfflineScreen() {
           tone={offline ? "ghost" : "success"}
           disabled={offline || queue.length === 0 || sync.isPending}
           onClick={async () => {
-            const count = await sync.mutateAsync();
-            toast.success(`${count} drop-off${count === 1 ? "" : "s"} synced to dispatch`);
+            try {
+              const count = await sync.mutateAsync();
+              const now = new Date().toISOString();
+              window.localStorage.setItem(LAST_SYNC_KEY, now);
+              setLastSync(now);
+              toast.success(`${count} drop-off${count === 1 ? "" : "s"} synced to dispatch`);
+            } catch {
+              toast.error("Sync failed — your drop-offs stay queued on the device.");
+            }
           }}
+
         >
           <RefreshCw className={`h-5 w-5 ${sync.isPending ? "animate-spin" : ""}`} />
           {offline ? "Syncing Paused until Network Restored" : "Sync Queue Now"}
