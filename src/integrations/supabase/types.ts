@@ -569,6 +569,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_profile_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
       is_apex_staff: { Args: { _user_id: string }; Returns: boolean }
       is_dispatch_supervisor: { Args: { _user_id: string }; Returns: boolean }
       owns_fleet_object: {
