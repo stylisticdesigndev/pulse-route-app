@@ -55,6 +55,10 @@ export const startDemoCourierSession = createServerFn({ method: "POST" }).handle
     await supabaseAdmin.from("routes").update({ driver_id: user.id }).eq("id", routes[0].id);
   }
 
+  // Claim the seeded demo records so owner-scoped policies allow them through.
+  await supabaseAdmin.from("drivers").update({ user_id: user.id }).is("user_id", null);
+  await supabaseAdmin.from("shifts").update({ driver_user_id: user.id }).is("driver_user_id", null);
+
   const { data: link, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
     type: "magiclink",
     email: DEMO_EMAIL,
