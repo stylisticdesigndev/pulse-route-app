@@ -115,6 +115,15 @@ function Settings() {
         >
           <Gauge className="h-4 w-4" /> Performance detail
         </Link>
+        <button
+          onClick={async () => {
+            await supabase.auth.signOut();
+            toast.message("Signed out");
+          }}
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-destructive/60 bg-destructive/15 text-sm font-bold text-destructive"
+        >
+          <LogOut className="h-4 w-4" /> Sign out
+        </button>
       </div>
     </AppShell>
   );
