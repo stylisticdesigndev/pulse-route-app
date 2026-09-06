@@ -12,6 +12,8 @@ import {
   useStops,
   type Stop,
 } from "@/lib/pulse-data";
+import { useRole } from "@/lib/role-context";
+import { FleetOverview } from "@/components/pulse/fleet-overview";
 
 
 export const Route = createFileRoute("/manifest")({
