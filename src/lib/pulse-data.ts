@@ -222,7 +222,7 @@ async function pushEvent(event: SubmitInput, shiftId: string | null) {
   const { error: stopError } = await supabase
     .from("stops")
     .update({
-      status: event.eventType === "delivered" ? "completed" : "exception",
+      status: event.eventType === "exception" ? "exception" : "completed",
       completed_at: new Date().toISOString(),
     })
     .eq("id", event.stopId);
