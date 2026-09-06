@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CloudOff, Flashlight, Gauge, Navigation, Ruler, Vibrate } from "lucide-react";
+import { CloudOff, Flashlight, Gauge, LogOut, Navigation, Ruler, Vibrate } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, Pill, ScreenHeader } from "@/components/pulse/shell";
+import { supabase } from "@/integrations/supabase/client";
 import { setOfflineMode, useDriver, useOfflineMode, useUpdateDriver } from "@/lib/pulse-data";
 
 export const Route = createFileRoute("/settings")({
