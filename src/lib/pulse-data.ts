@@ -274,3 +274,270 @@ export function useSyncQueue() {
 export function stopLabel(seq: number) {
   return String(seq).padStart(2, "0");
 }
+
+/* ---------------------------------- driver --------------------------------- */
+
+export type Driver = Tables<"drivers">;
+export type DispatchMessage = Tables<"dispatch_messages">;
+
+export const AVATAR_BUCKET = "driver-avatars";
+
+export function initialsOf(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+export function useDriver() {
+  return useQuery({
+    queryKey: ["driver"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("drivers")
+        .select("*")
+        .order("created_at", { ascending: true })
+        .limit(1);
+      if (error) throw error;
+      return (data?.[0] ?? null) as Driver | null;
+    },
+  });
+}
+
+export function useUpdateDriver() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: Partial<Driver> }) => {
+      const { error } = await supabase
+        .from("drivers")
+        .update({ ...patch, updated_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["driver"] }),
+  });
+}
+
+/** Uploads the picked photo to storage and stores its path on the driver row. */
+export function useUploadAvatar() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ driverId, file }: { driverId: string; file: File }) => {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${driverId}/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage
+        .from(AVATAR_BUCKET)
+        .upload(path, file, { upsert: true, contentType: file.type || "image/jpeg" });
+      if (error) throw error;
+      const { error: rowError } = await supabase
+        .from("drivers")
+        .update({ avatar_path: path, updated_at: new Date().toISOString() })
+        .eq("id", driverId);
+      if (rowError) throw rowError;
+      return path;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["driver"] });
+      qc.invalidateQueries({ queryKey: ["avatar"] });
+    },
+  });
+}
+
+export function useRemoveAvatar() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ driverId, path }: { driverId: string; path: string | null }) => {
+      if (path) await supabase.storage.from(AVATAR_BUCKET).remove([path]);
+      const { error } = await supabase
+        .from("drivers")
+        .update({ avatar_path: null, updated_at: new Date().toISOString() })
+        .eq("id", driverId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["driver"] });
+      qc.invalidateQueries({ queryKey: ["avatar"] });
+    },
+  });
+}
+
+/** Resolves a temporary display URL for a stored avatar object path. */
+export function useAvatarUrl(path: string | null | undefined) {
+  return useQuery({
+    queryKey: ["avatar", path ?? "none"],
+    enabled: Boolean(path),
+    staleTime: 45 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase.storage
+        .from(AVATAR_BUCKET)
+        .createSignedUrl(path as string, 60 * 60);
+      if (error) throw error;
+      return data.signedUrl;
+    },
+  });
+}
+
+/* ------------------------------- dispatch feed ------------------------------ */
+
+export function useMessages() {
+  return useQuery({
+    queryKey: ["messages"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("dispatch_messages")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as DispatchMessage[];
+    },
+  });
+}
+
+export function useMarkMessagesRead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("dispatch_messages")
+        .update({ read: true })
+        .eq("read", false);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["messages"] }),
+  });
+}
+
+/* ---------------------------------- breaks --------------------------------- */
+
+export function useSetBreak() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      shiftId,
+      start,
+      seconds = 0,
+    }: {
+      shiftId: string;
+      start: boolean;
+      seconds?: number;
+    }) => {
+      const { error } = await supabase
+        .from("shifts")
+        .update(
+          start
+            ? { status: "paused", break_started_at: new Date().toISOString() }
+            : { status: "active", break_started_at: null, break_seconds: seconds },
+        )
+        .eq("id", shiftId);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["shift"] }),
+  });
+}
+
+/* ------------------------------- shift history ------------------------------ */
+
+export function useShiftHistory() {
+  return useQuery({
+    queryKey: ["shift-history"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("shifts")
+        .select("*")
+        .order("started_at", { ascending: false });
+      if (error) throw error;
+      return data as Shift[];
+    },
+  });
+}
+
+export function useShift(id: string) {
+  return useQuery({
+    queryKey: ["shift", id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("shifts").select("*").eq("id", id).single();
+      if (error) throw error;
+      return data as Shift;
+    },
+  });
+}
+
+/* --------------------------- parcel-level outcomes -------------------------- */
+
+export function useSetPackageFlags() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      packageId,
+      patch,
+    }: {
+      packageId: string;
+      patch: { returned?: boolean; delivered?: boolean; scanned?: boolean };
+    }) => {
+      const { error } = await supabase.from("packages").update(patch).eq("id", packageId);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["packages"] }),
+  });
+}
+
+/** Re-opens a failed stop and pushes it to the back of the route. */
+export function useReattemptStop() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ stopId, nextSeq }: { stopId: string; nextSeq: number }) => {
+      const { error } = await supabase
+        .from("stops")
+        .update({ status: "pending", completed_at: null, seq: nextSeq })
+        .eq("id", stopId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: stopsQueryKey() });
+      qc.invalidateQueries({ queryKey: ["events"] });
+    },
+  });
+}
+
+/* ------------------------------ device geometry ----------------------------- */
+
+export function metersBetween(
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number },
+) {
+  const R = 6371000;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const lat1 = (a.lat * Math.PI) / 180;
+  const lat2 = (b.lat * Math.PI) / 180;
+  const h =
+    Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  return Math.round(2 * R * Math.asin(Math.sqrt(h)));
+}
+
+
+/** Driver-raised support note that shows up in the dispatch feed. */
+export function useSendDispatchNote() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      title,
+      body,
+      stopId,
+      kind = "alert",
+    }: {
+      title: string;
+      body: string;
+      stopId?: string | null;
+      kind?: string;
+    }) => {
+      const { error } = await supabase
+        .from("dispatch_messages")
+        .insert({ title, body, stop_id: stopId ?? null, kind });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["messages"] }),
+  });
+}

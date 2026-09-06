@@ -10,12 +10,20 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SplatRouteImport } from './routes/$'
+import { Route as BreakRouteImport } from './routes/break'
+import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ManifestRouteImport } from './routes/manifest'
 import { Route as MetricsRouteImport } from './routes/metrics'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as ParcelsRouteImport } from './routes/parcels'
+import { Route as PerformanceRouteImport } from './routes/performance'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SummaryRouteImport } from './routes/summary'
+import { Route as HelpSeqRouteImport } from './routes/help_.$seq'
+import { Route as HistoryIdRouteImport } from './routes/history_.$id'
 import { Route as NavSeqRouteImport } from './routes/nav.$seq'
 import { Route as ScanSeqRouteImport } from './routes/scan.$seq'
 import { Route as StopSeqRouteImport } from './routes/stop.$seq'
@@ -23,6 +31,21 @@ import { Route as StopSeqRouteImport } from './routes/stop.$seq'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SplatRoute = SplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BreakRoute = BreakRouteImport.update({
+  id: '/break',
+  path: '/break',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ManifestRoute = ManifestRouteImport.update({
@@ -35,6 +58,11 @@ const MetricsRoute = MetricsRouteImport.update({
   path: '/metrics',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OfflineRoute = OfflineRouteImport.update({
   id: '/offline',
   path: '/offline',
@@ -45,14 +73,34 @@ const ParcelsRoute = ParcelsRouteImport.update({
   path: '/parcels',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PerformanceRoute = PerformanceRouteImport.update({
+  id: '/performance',
+  path: '/performance',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SummaryRoute = SummaryRouteImport.update({
   id: '/summary',
   path: '/summary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpSeqRoute = HelpSeqRouteImport.update({
+  id: '/help_/$seq',
+  path: '/help/$seq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryIdRoute = HistoryIdRouteImport.update({
+  id: '/history_/$id',
+  path: '/history/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NavSeqRoute = NavSeqRouteImport.update({
@@ -73,24 +121,40 @@ const StopSeqRoute = StopSeqRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
+  '/break': typeof BreakRoute
+  '/history': typeof HistoryRoute
   '/manifest': typeof ManifestRoute
   '/metrics': typeof MetricsRoute
+  '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/parcels': typeof ParcelsRoute
+  '/performance': typeof PerformanceRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
   '/summary': typeof SummaryRoute
+  '/help/$seq': typeof HelpSeqRoute
+  '/history/$id': typeof HistoryIdRoute
   '/nav/$seq': typeof NavSeqRoute
   '/scan/$seq': typeof ScanSeqRoute
   '/stop/$seq': typeof StopSeqRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
+  '/break': typeof BreakRoute
+  '/history': typeof HistoryRoute
   '/manifest': typeof ManifestRoute
   '/metrics': typeof MetricsRoute
+  '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/parcels': typeof ParcelsRoute
+  '/performance': typeof PerformanceRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
   '/summary': typeof SummaryRoute
+  '/help/$seq': typeof HelpSeqRoute
+  '/history/$id': typeof HistoryIdRoute
   '/nav/$seq': typeof NavSeqRoute
   '/scan/$seq': typeof ScanSeqRoute
   '/stop/$seq': typeof StopSeqRoute
@@ -98,12 +162,20 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
+  '/break': typeof BreakRoute
+  '/history': typeof HistoryRoute
   '/manifest': typeof ManifestRoute
   '/metrics': typeof MetricsRoute
+  '/notifications': typeof NotificationsRoute
   '/offline': typeof OfflineRoute
   '/parcels': typeof ParcelsRoute
+  '/performance': typeof PerformanceRoute
   '/profile': typeof ProfileRoute
+  '/settings': typeof SettingsRoute
   '/summary': typeof SummaryRoute
+  '/help_/$seq': typeof HelpSeqRoute
+  '/history_/$id': typeof HistoryIdRoute
   '/nav/$seq': typeof NavSeqRoute
   '/scan/$seq': typeof ScanSeqRoute
   '/stop/$seq': typeof StopSeqRoute
@@ -112,36 +184,60 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$'
+    | '/break'
+    | '/history'
     | '/manifest'
     | '/metrics'
+    | '/notifications'
     | '/offline'
     | '/parcels'
+    | '/performance'
     | '/profile'
+    | '/settings'
     | '/summary'
+    | '/help/$seq'
+    | '/history/$id'
     | '/nav/$seq'
     | '/scan/$seq'
     | '/stop/$seq'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$'
+    | '/break'
+    | '/history'
     | '/manifest'
     | '/metrics'
+    | '/notifications'
     | '/offline'
     | '/parcels'
+    | '/performance'
     | '/profile'
+    | '/settings'
     | '/summary'
+    | '/help/$seq'
+    | '/history/$id'
     | '/nav/$seq'
     | '/scan/$seq'
     | '/stop/$seq'
   id:
     | '__root__'
     | '/'
+    | '/$'
+    | '/break'
+    | '/history'
     | '/manifest'
     | '/metrics'
+    | '/notifications'
     | '/offline'
     | '/parcels'
+    | '/performance'
     | '/profile'
+    | '/settings'
     | '/summary'
+    | '/help_/$seq'
+    | '/history_/$id'
     | '/nav/$seq'
     | '/scan/$seq'
     | '/stop/$seq'
@@ -149,12 +245,20 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SplatRoute: typeof SplatRoute
+  BreakRoute: typeof BreakRoute
+  HistoryRoute: typeof HistoryRoute
   ManifestRoute: typeof ManifestRoute
   MetricsRoute: typeof MetricsRoute
+  NotificationsRoute: typeof NotificationsRoute
   OfflineRoute: typeof OfflineRoute
   ParcelsRoute: typeof ParcelsRoute
+  PerformanceRoute: typeof PerformanceRoute
   ProfileRoute: typeof ProfileRoute
+  SettingsRoute: typeof SettingsRoute
   SummaryRoute: typeof SummaryRoute
+  HelpSeqRoute: typeof HelpSeqRoute
+  HistoryIdRoute: typeof HistoryIdRoute
   NavSeqRoute: typeof NavSeqRoute
   ScanSeqRoute: typeof ScanSeqRoute
   StopSeqRoute: typeof StopSeqRoute
@@ -167,6 +271,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$': {
+      id: '/$'
+      path: '/$'
+      fullPath: '/$'
+      preLoaderRoute: typeof SplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/break': {
+      id: '/break'
+      path: '/break'
+      fullPath: '/break'
+      preLoaderRoute: typeof BreakRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/manifest': {
@@ -183,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MetricsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/offline': {
       id: '/offline'
       path: '/offline'
@@ -197,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ParcelsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/performance': {
+      id: '/performance'
+      path: '/performance'
+      fullPath: '/performance'
+      preLoaderRoute: typeof PerformanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -204,11 +343,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/summary': {
       id: '/summary'
       path: '/summary'
       fullPath: '/summary'
       preLoaderRoute: typeof SummaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help_/$seq': {
+      id: '/help_/$seq'
+      path: '/help/$seq'
+      fullPath: '/help/$seq'
+      preLoaderRoute: typeof HelpSeqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history_/$id': {
+      id: '/history_/$id'
+      path: '/history/$id'
+      fullPath: '/history/$id'
+      preLoaderRoute: typeof HistoryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/nav/$seq': {
@@ -237,12 +397,20 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SplatRoute: SplatRoute,
+  BreakRoute: BreakRoute,
+  HistoryRoute: HistoryRoute,
   ManifestRoute: ManifestRoute,
   MetricsRoute: MetricsRoute,
+  NotificationsRoute: NotificationsRoute,
   OfflineRoute: OfflineRoute,
   ParcelsRoute: ParcelsRoute,
+  PerformanceRoute: PerformanceRoute,
   ProfileRoute: ProfileRoute,
+  SettingsRoute: SettingsRoute,
   SummaryRoute: SummaryRoute,
+  HelpSeqRoute: HelpSeqRoute,
+  HistoryIdRoute: HistoryIdRoute,
   NavSeqRoute: NavSeqRoute,
   ScanSeqRoute: ScanSeqRoute,
   StopSeqRoute: StopSeqRoute,
