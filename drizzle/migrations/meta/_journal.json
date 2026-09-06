@@ -36,6 +36,13 @@
       "when": 1788731881985,
       "tag": "0004_proof_of_service_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788733349517,
+      "tag": "0005_harden_rls_and_storage",
+      "breakpoints": true
     }
   ]
 }

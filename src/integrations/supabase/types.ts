@@ -537,6 +537,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      is_apex_staff: { Args: { _user_id: string }; Returns: boolean }
       is_dispatch_supervisor: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
