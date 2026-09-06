@@ -179,9 +179,12 @@ function StopDetail() {
             tone="warning"
             disabled={reattempt.isPending}
             onClick={async () => {
-              await reattempt.mutateAsync(stop.id);
-              toast.success(`Stop ${stopLabel(stop.seq)} queued for a second attempt`);
-            }}
+              await reattempt.mutateAsync({
+                stopId: stop.id,
+                nextSeq: Math.max(...stops.map((s) => s.seq)) + 1,
+              });
+              toast.success(`${stop.recipient} moved to the end of the route for a retry`);
+
           >
             <RotateCcw className="h-5 w-5" /> Reattempt This Stop
           </BigButton>
