@@ -41,6 +41,12 @@ function OfflineScreen() {
   const sync = useSyncQueue();
   const { data: stops = [] } = useStops();
   const active = stops.find((s) => s.status === "in_transit");
+  const [lastSync, setLastSync] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLastSync(window.localStorage.getItem(LAST_SYNC_KEY));
+  }, [queue.length]);
+
 
   return (
     <AppShell bottomNav className="flex flex-col">
