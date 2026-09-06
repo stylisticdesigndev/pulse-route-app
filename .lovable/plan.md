@@ -29,6 +29,7 @@ Shift start + pre-trip, manifest/map, stop detail, navigation/reroute, scanner, 
 - Performance detail: on-time rate and completion rate with a per-stop breakdown, following Dasher's on-time rate screen structure, driven by our existing delivery events.
 - Notifications / dispatch messages: dispatch alerts, reroute notices, manifest updates, with an unread dot on the header.
 - Settings: navigation preference, torch default, haptics, units, offline simulation toggle (currently buried), sign-out.
+- Editable profile: today's profile page only displays the driver. Add an Edit profile screen with a tappable avatar (take photo or choose from library, crop-free square, replace/remove), plus editable display name, phone, emergency contact, preferred language, and a read-only block for the fields dispatch owns (driver ID, company, assigned vehicle, manifest). The avatar replaces the "MV" initials circle everywhere it appears, falling back to initials when no photo is set. Upload shows progress, and a failed upload keeps the chosen photo with a Retry.
 
 ### 4. Edge-case flows
 - Undeliverable → return to depot: mark a parcel as return-to-sender and see returns on the summary.
@@ -40,13 +41,14 @@ Shift start + pre-trip, manifest/map, stop detail, navigation/reroute, scanner, 
 ## Suggested build order
 1. Empty states + shared error/retry block + off-shift lockout + styled 404.
 2. Stop help sheet, break/pause shift, permission states.
-3. Shift history, performance detail, settings, notifications.
+3. Editable profile with photo upload, shift history, performance detail, settings, notifications.
 4. Returns, partial delivery, reattempt, proximity guard.
 
 ## Technical notes
-- New routes: `help.$seq`, `break`, `history`, `history.$id`, `performance`, `notifications`, `settings`, `$` (catch-all).
-- New shared components in `src/components/pulse/`: `empty-state.tsx`, `error-state.tsx`, `permission-gate.tsx` — all built from existing shell primitives.
-- Data: `shifts` gains break start/end and status `paused`; `packages` gains a `returned` flag; `delivery_events` gains `attempt` for reattempts; a `dispatch_messages` table for notifications. Each with GRANTs and RLS in the same migration.
+- New routes: `help.$seq`, `break`, `history`, `history.$id`, `performance`, `notifications`, `settings`, `profile.edit`, `$` (catch-all).
+- New shared components in `src/components/pulse/`: `empty-state.tsx`, `error-state.tsx`, `permission-gate.tsx`, `avatar.tsx` — all built from existing shell primitives.
+- Data: `shifts` gains break start/end and status `paused`; `packages` gains a `returned` flag; `delivery_events` gains `attempt` for reattempts; a `dispatch_messages` table for notifications; a `drivers` table holding driver code, display name, phone, emergency contact, language and `avatar_path`, replacing the hardcoded `DRIVER` constant. Each with GRANTs and RLS in the same migration.
+- Photo upload uses a `driver-avatars` storage bucket with policies on `storage.objects`; the app stores only the object path and resolves a URL for display.
 - Performance/history read from existing `delivery_events` and `shifts` — no duplicated metrics storage.
 - Query hooks extend `src/lib/pulse-data.ts`; loading/error branches feed the new shared states.
 
