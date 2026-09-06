@@ -4,12 +4,14 @@ import {
   CheckCircle2,
   CircleAlert,
   MapPin,
-  PhoneCall,
+  PackageOpen,
   RotateCcw,
+  Satellite,
   Split,
   TriangleAlert,
   X,
 } from "lucide-react";
+
 import { useState } from "react";
 import { toast } from "sonner";
 import { MapCanvas } from "@/components/pulse/map-canvas";
