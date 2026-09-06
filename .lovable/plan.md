@@ -29,6 +29,7 @@ Shift start + pre-trip, manifest/map, stop detail, navigation/reroute, scanner, 
 - Performance detail: on-time rate and completion rate with a per-stop breakdown, following Dasher's on-time rate screen structure, driven by our existing delivery events.
 - Notifications / dispatch messages: dispatch alerts, reroute notices, manifest updates, with an unread dot on the header.
 - Settings: navigation preference, torch default, haptics, units, offline simulation toggle (currently buried), sign-out.
+- Editable profile: today's profile page only displays the driver. Add an Edit profile screen with a tappable avatar (take photo or choose from library, crop-free square, replace/remove), plus editable display name, phone, emergency contact, preferred language, and a read-only block for the fields dispatch owns (driver ID, company, assigned vehicle, manifest). The avatar replaces the "MV" initials circle everywhere it appears, falling back to initials when no photo is set. Upload shows progress, and a failed upload keeps the chosen photo with a Retry.
 
 ### 4. Edge-case flows
 - Undeliverable → return to depot: mark a parcel as return-to-sender and see returns on the summary.
