@@ -8,9 +8,9 @@ export function MapCanvas({
   stopLabel,
   className,
 }: {
-  variant?: Variant;
-  stopLabel?: string;
-  className?: string;
+  variant?: Variant | undefined;
+  stopLabel?: string | undefined;
+  className?: string | undefined;
 }) {
   return (
     <div className={cn("relative h-full w-full overflow-hidden bg-map", className)}>
