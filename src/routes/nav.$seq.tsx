@@ -218,7 +218,7 @@ function SheetFrame({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur">
+    <div className="fixed inset-0 z-50 flex flex-col bg-background">
       <div className="safe-top grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 pb-3">
         <div className="flex min-w-0 items-center gap-3">
           {icon}
