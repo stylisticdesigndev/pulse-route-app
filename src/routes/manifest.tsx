@@ -159,13 +159,21 @@ function ManifestScreen() {
               </div>
               <span className="text-xs font-bold text-warning">ETA {active.eta}</span>
             </div>
-            <h2 className="mt-2 truncate text-xl font-bold">{active.recipient}</h2>
+            <h2 className="mt-2 truncate text-xl font-bold">{active.recipient_name ?? active.recipient}</h2>
             <p className="text-sm text-muted-foreground">
-              {active.address} • {active.sector}
+              {active.address_line1 ?? active.address}
+              {active.city ? ` • ${active.city}, ${active.state} ${active.zip_code}` : ` • ${active.sector}`}
             </p>
             <p className="text-sm text-muted-foreground">
               Window: {active.window_start} – {active.window_end} • {active.distance_km} km remaining
             </p>
+            {active.route ? (
+              <p className="mt-1 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                Route {active.route.code ?? "—"} • {active.route.total_distance_miles ?? 0} mi planned •{" "}
+                {active.route.estimated_duration_minutes ?? 0} min
+              </p>
+            ) : null}
+
             <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
               <BigButton onClick={() => navigate({ to: "/nav/$seq", params: { seq: String(active.seq) } })}>
                 <Navigation className="h-5 w-5" /> Start Navigation
