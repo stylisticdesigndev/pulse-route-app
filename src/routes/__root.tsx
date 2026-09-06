@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { RoleProvider } from "@/lib/role-context";
 import { RoleSwitcher } from "@/components/pulse/role-switcher";
+import { registerServiceWorker } from "@/lib/register-sw";
 
 function NotFoundComponent() {
   return (
@@ -90,7 +91,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "PulseRoute is the Apex Move Dynamics driver app: pre-trip checks, live manifest, navigation, parcel scanning, proof of service and offline sync.",
       },
-      { name: "theme-color", content: "#101a2b" },
+      { name: "theme-color", content: "#0F172A" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "PulseRoute" },
+      { name: "application-name", content: "PulseRoute" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -102,8 +108,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "apple-touch-icon", href: "/icons/icon-192.png", sizes: "192x192" },
     ],
+
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -128,7 +137,12 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
+
   return (
+
     <QueryClientProvider client={queryClient}>
       <RoleProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
