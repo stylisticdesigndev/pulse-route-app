@@ -42,6 +42,8 @@ function StopDetail() {
   const { data: stops = [] } = useStops();
   const stop = stops.find((s) => String(s.seq) === seq);
   const { data: packages = [] } = usePackages(stop?.id);
+  const reattempt = useReattemptStop();
+
 
   if (!stop) {
     return (
