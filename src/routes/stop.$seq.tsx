@@ -168,11 +168,31 @@ function StopDetail() {
         </section>
       </div>
 
-      <div className="safe-bottom mt-auto border-t border-border/70 bg-background px-4 pt-3">
+      <div className="safe-bottom mt-auto space-y-2 border-t border-border/70 bg-background px-4 pt-3">
+        {stop.status === "exception" ? (
+          <BigButton
+            tone="warning"
+            disabled={reattempt.isPending}
+            onClick={async () => {
+              await reattempt.mutateAsync(stop.id);
+              toast.success(`Stop ${stopLabel(stop.seq)} queued for a second attempt`);
+            }}
+          >
+            <RotateCcw className="h-5 w-5" /> Reattempt This Stop
+          </BigButton>
+        ) : null}
         <BigButton onClick={() => navigate({ to: "/nav/$seq", params: { seq } })}>
           <Navigation className="h-5 w-5" /> Launch Turn-by-Turn Navigation
         </BigButton>
+        <Link
+          to="/help/$seq"
+          params={{ seq }}
+          className="flex h-12 items-center justify-center gap-2 rounded-xl border border-border bg-surface-2 text-sm font-bold"
+        >
+          <LifeBuoy className="h-4 w-4" /> Need help at this stop?
+        </Link>
       </div>
+
     </AppShell>
   );
 }
