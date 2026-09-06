@@ -106,14 +106,12 @@ function Scanner() {
               <Flashlight className="h-5 w-5" />
             </button>
             <button
-              onClick={() => {
-                const code = window.prompt("Enter parcel barcode");
-                if (code) void confirm(code);
-              }}
+              onClick={() => setShowManual((s) => !s)}
               className="flex h-10 items-center gap-1.5 rounded-full bg-surface-2/90 px-3 text-xs font-bold"
             >
               <Keyboard className="h-4 w-4" /> Manual Entry
             </button>
+
           </div>
         </div>
 
