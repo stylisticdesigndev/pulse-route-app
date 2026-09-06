@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CloudOff, RefreshCw, Wifi } from "lucide-react";
+import { CheckCheck, CloudOff, RefreshCw, Wifi } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AppShell, BigButton, Pill, ScreenHeader } from "@/components/pulse/shell";
+import { EmptyState } from "@/components/pulse/states";
 import {
   setOfflineMode,
   stopLabel,
@@ -10,6 +12,9 @@ import {
   useStops,
   useSyncQueue,
 } from "@/lib/pulse-data";
+
+const LAST_SYNC_KEY = "pulseroute.lastSync.v1";
+
 
 export const Route = createFileRoute("/offline")({
   head: () => ({
