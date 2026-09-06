@@ -575,6 +575,7 @@ export type Database = {
       }
       is_apex_staff: { Args: { _user_id: string }; Returns: boolean }
       is_dispatch_supervisor: { Args: { _user_id: string }; Returns: boolean }
+      mark_dispatch_messages_read: { Args: never; Returns: undefined }
       owns_fleet_object: {
         Args: { _bucket: string; _name: string }
         Returns: boolean
