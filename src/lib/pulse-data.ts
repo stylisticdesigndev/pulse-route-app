@@ -423,10 +423,7 @@ export function useMarkMessagesRead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from("dispatch_messages")
-        .update({ read: true })
-        .eq("read", false);
+      const { error } = await supabase.rpc("mark_dispatch_messages_read");
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["messages"] }),
