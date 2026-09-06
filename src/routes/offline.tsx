@@ -65,10 +65,18 @@ function OfflineScreen() {
         </div>
 
         {queue.length === 0 ? (
-          <p className="rounded-xl border border-border bg-surface px-4 py-6 text-center text-sm text-muted-foreground">
-            Nothing queued. Completed drop-offs are synced to dispatch.
-          </p>
+          <EmptyState
+            icon={CheckCheck}
+            tone="success"
+            title="Everything synced"
+            body={
+              lastSync
+                ? `Last synced with dispatch at ${new Date(lastSync).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}. Nothing is waiting on the device.`
+                : "Nothing is waiting on the device. Completed drop-offs go straight to dispatch."
+            }
+          />
         ) : (
+
           <ul className="space-y-2">
             {queue.map((item) => (
               <li
