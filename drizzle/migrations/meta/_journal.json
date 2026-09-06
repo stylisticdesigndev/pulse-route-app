@@ -43,6 +43,13 @@
       "when": 1788733349517,
       "tag": "0005_harden_rls_and_storage",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788733541840,
+      "tag": "0006_tighten_staff_role_check",
+      "breakpoints": true
     }
   ]
 }
