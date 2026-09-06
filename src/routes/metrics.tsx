@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Activity, CloudOff, TrendingUp } from "lucide-react";
-import { AppShell, Pill, ScreenHeader } from "@/components/pulse/shell";
-import { stopLabel, useEvents, useQueue, useStops } from "@/lib/pulse-data";
+import { Activity, CloudOff, LineChart, TrendingUp } from "lucide-react";
+import { AppShell, BigButton, Pill, ScreenHeader } from "@/components/pulse/shell";
+import { EmptyState, ErrorState, OffShiftState } from "@/components/pulse/states";
+import { stopLabel, useActiveShift, useEvents, useQueue, useStops } from "@/lib/pulse-data";
+
 
 export const Route = createFileRoute("/metrics")({
   head: () => ({
