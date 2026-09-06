@@ -50,6 +50,10 @@ function ManifestScreen() {
   const upcoming = stops.filter((s) => s.status === "pending" && s.id !== active?.id);
   const done = stops.filter((s) => s.status === "completed" || s.status === "exception");
 
+  if (activeRole === "dispatch_supervisor") {
+    return <FleetOverview />;
+  }
+
   if (!shiftLoading && !shift) {
     return (
       <AppShell bottomNav>
