@@ -10,33 +10,115 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ManifestRouteImport } from './routes/manifest'
+import { Route as OfflineRouteImport } from './routes/offline'
+import { Route as SummaryRouteImport } from './routes/summary'
+import { Route as NavSeqRouteImport } from './routes/nav.$seq'
+import { Route as ScanSeqRouteImport } from './routes/scan.$seq'
+import { Route as StopSeqRouteImport } from './routes/stop.$seq'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ManifestRoute = ManifestRouteImport.update({
+  id: '/manifest',
+  path: '/manifest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OfflineRoute = OfflineRouteImport.update({
+  id: '/offline',
+  path: '/offline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SummaryRoute = SummaryRouteImport.update({
+  id: '/summary',
+  path: '/summary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NavSeqRoute = NavSeqRouteImport.update({
+  id: '/nav/$seq',
+  path: '/nav/$seq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScanSeqRoute = ScanSeqRouteImport.update({
+  id: '/scan/$seq',
+  path: '/scan/$seq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StopSeqRoute = StopSeqRouteImport.update({
+  id: '/stop/$seq',
+  path: '/stop/$seq',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/manifest': typeof ManifestRoute
+  '/offline': typeof OfflineRoute
+  '/summary': typeof SummaryRoute
+  '/nav/$seq': typeof NavSeqRoute
+  '/scan/$seq': typeof ScanSeqRoute
+  '/stop/$seq': typeof StopSeqRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/manifest': typeof ManifestRoute
+  '/offline': typeof OfflineRoute
+  '/summary': typeof SummaryRoute
+  '/nav/$seq': typeof NavSeqRoute
+  '/scan/$seq': typeof ScanSeqRoute
+  '/stop/$seq': typeof StopSeqRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/manifest': typeof ManifestRoute
+  '/offline': typeof OfflineRoute
+  '/summary': typeof SummaryRoute
+  '/nav/$seq': typeof NavSeqRoute
+  '/scan/$seq': typeof ScanSeqRoute
+  '/stop/$seq': typeof StopSeqRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/manifest'
+    | '/offline'
+    | '/summary'
+    | '/nav/$seq'
+    | '/scan/$seq'
+    | '/stop/$seq'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/manifest'
+    | '/offline'
+    | '/summary'
+    | '/nav/$seq'
+    | '/scan/$seq'
+    | '/stop/$seq'
+  id:
+    | '__root__'
+    | '/'
+    | '/manifest'
+    | '/offline'
+    | '/summary'
+    | '/nav/$seq'
+    | '/scan/$seq'
+    | '/stop/$seq'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ManifestRoute: typeof ManifestRoute
+  OfflineRoute: typeof OfflineRoute
+  SummaryRoute: typeof SummaryRoute
+  NavSeqRoute: typeof NavSeqRoute
+  ScanSeqRoute: typeof ScanSeqRoute
+  StopSeqRoute: typeof StopSeqRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +130,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/manifest': {
+      id: '/manifest'
+      path: '/manifest'
+      fullPath: '/manifest'
+      preLoaderRoute: typeof ManifestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/offline': {
+      id: '/offline'
+      path: '/offline'
+      fullPath: '/offline'
+      preLoaderRoute: typeof OfflineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/summary': {
+      id: '/summary'
+      path: '/summary'
+      fullPath: '/summary'
+      preLoaderRoute: typeof SummaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nav/$seq': {
+      id: '/nav/$seq'
+      path: '/nav/$seq'
+      fullPath: '/nav/$seq'
+      preLoaderRoute: typeof NavSeqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scan/$seq': {
+      id: '/scan/$seq'
+      path: '/scan/$seq'
+      fullPath: '/scan/$seq'
+      preLoaderRoute: typeof ScanSeqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stop/$seq': {
+      id: '/stop/$seq'
+      path: '/stop/$seq'
+      fullPath: '/stop/$seq'
+      preLoaderRoute: typeof StopSeqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ManifestRoute: ManifestRoute,
+  OfflineRoute: OfflineRoute,
+  SummaryRoute: SummaryRoute,
+  NavSeqRoute: NavSeqRoute,
+  ScanSeqRoute: ScanSeqRoute,
+  StopSeqRoute: StopSeqRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
