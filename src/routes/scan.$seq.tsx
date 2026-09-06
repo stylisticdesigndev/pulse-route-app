@@ -158,6 +158,56 @@ function Scanner() {
           </span>
         </div>
 
+        {cameraDenied ? <PermissionGate kind="camera" onRetry={() => setShowManual(true)} /> : null}
+
+        {rejected ? (
+          <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-3 py-3">
+            <p className="flex items-center gap-2 text-sm font-bold text-destructive">
+              <TriangleAlert className="h-4 w-4" /> Barcode not on this manifest
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {rejected === "unreadable"
+                ? "Nothing readable in the frame."
+                : `“${rejected}” belongs to another route.`}{" "}
+              Re-scan, key it in, or flag it to dispatch.
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setRejected(null)}
+                className="flex h-11 items-center justify-center rounded-xl border border-border bg-surface-2 text-sm font-bold"
+              >
+                Try scan again
+              </button>
+              <Link
+                to="/help/$seq"
+                params={{ seq }}
+                className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-border bg-surface-2 text-sm font-bold"
+              >
+                <LifeBuoy className="h-4 w-4" /> Report
+              </Link>
+            </div>
+          </div>
+        ) : null}
+
+        {showManual ? (
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+            <input
+              autoFocus
+              value={manual}
+              onChange={(e) => setManual(e.target.value)}
+              placeholder="Enter barcode"
+              className="h-12 rounded-xl border border-border bg-surface-2 px-3 text-sm font-bold outline-none placeholder:text-muted-foreground focus:border-primary"
+            />
+            <button
+              onClick={() => void confirm(manual)}
+              disabled={!manual.trim() || scan.isPending}
+              className="h-12 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground disabled:opacity-50"
+            >
+              Verify
+            </button>
+          </div>
+        ) : null}
+
         {focus ? (
           <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-success/40 bg-surface px-3 py-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/15">
@@ -173,7 +223,11 @@ function Scanner() {
           </div>
         ) : null}
 
-        {next ? (
+        {packages.length === 0 ? (
+          <p className="rounded-xl border border-border bg-surface px-4 py-5 text-center text-sm text-muted-foreground">
+            No parcels are assigned to this stop.
+          </p>
+        ) : next ? (
           <BigButton tone="success" disabled={scan.isPending} onClick={() => confirm()}>
             <Check className="h-5 w-5" /> Confirm Package Stowed
           </BigButton>
@@ -182,7 +236,7 @@ function Scanner() {
             <Check className="h-5 w-5" /> All parcels stowed — Navigate
           </BigButton>
         )}
-        <p className="sr-only">{manual}</p>
+
       </div>
     </AppShell>
   );
