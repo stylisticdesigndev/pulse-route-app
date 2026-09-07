@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { isDemoSession } from "@/lib/demo-session";
+import { DEMO_PACKAGES, DEMO_SHIFT, DEMO_STOPS } from "@/lib/demo-manifest";
 
 export type Stop = Tables<"stops">;
 export type Package = Tables<"packages">;
@@ -111,16 +113,24 @@ export function useStops() {
   return useQuery({
     queryKey: stopsQueryKey(),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("stops")
-        .select(
-          "*, route:routes!inner(id, code, status, scheduled_date, total_distance_miles, estimated_duration_minutes)",
-        )
-        .in("routes.status", ["active", "assigned"])
-        .order("sequence_order", { ascending: true, nullsFirst: false })
-        .order("seq", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as unknown as StopWithRoute[];
+      const demo = isDemoSession();
+      try {
+        const { data, error } = await supabase
+          .from("stops")
+          .select(
+            "*, route:routes!inner(id, code, status, scheduled_date, total_distance_miles, estimated_duration_minutes)",
+          )
+          .in("routes.status", ["active", "assigned"])
+          .order("sequence_order", { ascending: true, nullsFirst: false })
+          .order("seq", { ascending: true });
+        if (error) throw error;
+        const rows = (data ?? []) as unknown as StopWithRoute[];
+        if (!rows.length && demo) return DEMO_STOPS as unknown as StopWithRoute[];
+        return rows;
+      } catch (error) {
+        if (demo) return DEMO_STOPS as unknown as StopWithRoute[];
+        throw error;
+      }
     },
   });
 }
@@ -130,10 +140,22 @@ export function usePackages(stopId?: string) {
   return useQuery({
     queryKey: ["packages", stopId ?? "all"],
     queryFn: async () => {
-      const query = supabase.from("packages").select("*").order("code");
-      const { data, error } = stopId ? await query.eq("stop_id", stopId) : await query;
-      if (error) throw error;
-      return data as Package[];
+      const demo = isDemoSession();
+      const fallback = () =>
+        stopId
+          ? (DEMO_PACKAGES as Package[]).filter((pkg) => pkg.stop_id === stopId)
+          : (DEMO_PACKAGES as Package[]);
+      try {
+        const query = supabase.from("packages").select("*").order("code");
+        const { data, error } = stopId ? await query.eq("stop_id", stopId) : await query;
+        if (error) throw error;
+        const rows = (data ?? []) as Package[];
+        if (!rows.length && demo) return fallback();
+        return rows;
+      } catch (error) {
+        if (demo) return fallback();
+        throw error;
+      }
     },
   });
 }
@@ -156,13 +178,21 @@ export function useActiveShift() {
   return useQuery({
     queryKey: ["shift"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("shifts")
-        .select("*")
-        .order("started_at", { ascending: false })
-        .limit(1);
-      if (error) throw error;
-      return (data?.[0] ?? null) as Shift | null;
+      const demo = isDemoSession();
+      try {
+        const { data, error } = await supabase
+          .from("shifts")
+          .select("*")
+          .order("started_at", { ascending: false })
+          .limit(1);
+        if (error) throw error;
+        const row = (data?.[0] ?? null) as Shift | null;
+        if (!row && demo) return DEMO_SHIFT as Shift;
+        return row;
+      } catch (error) {
+        if (demo) return DEMO_SHIFT as Shift;
+        throw error;
+      }
     },
   });
 }
