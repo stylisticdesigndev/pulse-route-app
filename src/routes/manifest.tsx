@@ -14,6 +14,7 @@ import {
   type StopWithRoute,
 } from "@/lib/pulse-data";
 import { useRole } from "@/lib/role-context";
+import { useUnitPrefs } from "@/lib/units";
 import { FleetOverview } from "@/components/pulse/fleet-overview";
 
 
@@ -45,6 +46,7 @@ function ManifestScreen() {
   const offline = useOfflineMode();
   const queue = useQueue();
   const unread = messages.filter((m) => !m.read).length;
+  const fmt = useUnitPrefs();
 
   const active =
     stops.find((s) => s.status === "in_transit") ?? stops.find((s) => s.status === "pending");
@@ -158,7 +160,7 @@ function ManifestScreen() {
                   {active.status === "in_transit" ? "In transit" : "Next up"}
                 </Pill>
               </div>
-              <span className="text-xs font-bold text-warning">ETA {active.eta}</span>
+              <span className="text-xs font-bold text-warning">ETA {fmt.clockString(active.eta)}</span>
             </div>
             <h2 className="mt-2 truncate text-xl font-bold">{active.recipient_name ?? active.recipient}</h2>
             <p className="text-sm text-muted-foreground">
@@ -166,11 +168,12 @@ function ManifestScreen() {
               {active.city ? ` • ${active.city}, ${active.state} ${active.zip_code}` : ` • ${active.sector}`}
             </p>
             <p className="text-sm text-muted-foreground">
-              Window: {active.window_start} – {active.window_end} • {active.distance_km} km remaining
+              Window: {fmt.clockString(active.window_start)} – {fmt.clockString(active.window_end)} •{" "}
+              {fmt.km(active.distance_km)} remaining
             </p>
             {active.route ? (
               <p className="mt-1 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Route {active.route.code ?? "—"} • {active.route.total_distance_miles ?? 0} mi planned •{" "}
+                Route {active.route.code ?? "—"} • {fmt.mi(active.route.total_distance_miles ?? 0)} planned •{" "}
                 {active.route.estimated_duration_minutes ?? 0} min
               </p>
             ) : null}
@@ -231,6 +234,7 @@ function ManifestScreen() {
 }
 
 function StopRow({ stop }: { stop: Stop | StopWithRoute }) {
+  const fmt = useUnitPrefs();
   const done = stop.status === "completed";
   const failed = stop.status === "exception";
   return (
@@ -253,7 +257,7 @@ function StopRow({ stop }: { stop: Stop | StopWithRoute }) {
       <span className="min-w-0">
         <span className="block truncate text-sm font-bold">{stop.recipient}</span>
         <span className="block truncate text-xs text-muted-foreground">
-          {stop.address} • {stop.distance_km} km
+          {stop.address} • {fmt.km(stop.distance_km)}
         </span>
       </span>
       <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />

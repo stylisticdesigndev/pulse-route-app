@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { AppShell, BigButton, Pill, ScreenHeader } from "@/components/pulse/shell";
 import { stopLabel, usePackages, useReattemptStop, useStops } from "@/lib/pulse-data";
+import { useUnitPrefs } from "@/lib/units";
 
 
 export const Route = createFileRoute("/stop/$seq")({
@@ -37,6 +38,7 @@ export const Route = createFileRoute("/stop/$seq")({
 });
 
 function StopDetail() {
+  const fmt = useUnitPrefs();
   const { seq } = Route.useParams();
   const navigate = useNavigate();
   const { data: stops = [] } = useStops();
@@ -71,7 +73,7 @@ function StopDetail() {
         right={
           <Pill tone="warning">
             <span className="h-1.5 w-1.5 rounded-full bg-warning" />
-            {stop.window_start} – {stop.window_end}
+            {fmt.clockString(stop.window_start)} – {fmt.clockString(stop.window_end)}
           </Pill>
         }
       />
@@ -82,7 +84,7 @@ function StopDetail() {
             <Pill>
               Stop {stopLabel(stop.seq)} of {stopLabel(stops.length)}
             </Pill>
-            <span className="text-sm font-bold text-primary">{stop.distance_km} km away</span>
+            <span className="text-sm font-bold text-primary">{fmt.km(stop.distance_km)} away</span>
           </div>
           <h2 className="mt-3 truncate text-2xl font-bold">{stop.recipient}</h2>
           <p className="mt-1 flex items-start gap-1.5 text-sm text-muted-foreground">
@@ -99,7 +101,7 @@ function StopDetail() {
               <PhoneCall className="h-4 w-4" /> Call Recipient
             </a>
             <button
-              onClick={() => toast.success(`ETA ${stop.eta} sent to ${stop.recipient}`)}
+              onClick={() => toast.success(`ETA ${fmt.clockString(stop.eta)} sent to ${stop.recipient}`)}
               className="flex h-12 items-center justify-center gap-2 rounded-xl border border-border bg-surface-2 text-sm font-bold"
             >
               <MessageSquare className="h-4 w-4" /> Send ETA SMS

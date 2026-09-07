@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell, BigButton, Pill } from "@/components/pulse/shell";
 import { DRIVER, useStartShift } from "@/lib/pulse-data";
+import { useUnitPrefs } from "@/lib/units";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -34,6 +35,7 @@ const CHECKS = [
 ];
 
 function DriverAuth() {
+  const fmt = useUnitPrefs();
   const navigate = useNavigate();
   const [odometer, setOdometer] = useState("42,890.4");
   const [checked, setChecked] = useState<boolean[]>(() => CHECKS.map(() => true));
@@ -78,7 +80,7 @@ function DriverAuth() {
           </div>
           <p className="mt-2 text-xl font-bold">{DRIVER.vehicle}</p>
           <p className="mt-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Current Odometer (miles)
+            Current Odometer ({fmt.isMetric ? "kilometres" : "miles"})
           </p>
           <div className="mt-2 flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3">
             <input

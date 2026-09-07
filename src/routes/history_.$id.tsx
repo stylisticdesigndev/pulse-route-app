@@ -4,6 +4,7 @@ import { AppShell, Pill, ScreenHeader } from "@/components/pulse/shell";
 import { ErrorState } from "@/components/pulse/states";
 import { stopLabel, useEvents, useShift, useStops } from "@/lib/pulse-data";
 import { shiftDuration } from "./history";
+import { useUnitPrefs } from "@/lib/units";
 
 export const Route = createFileRoute("/history_/$id")({
   head: () => ({
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/history_/$id")({
 });
 
 function ShiftDetail() {
+  const fmt = useUnitPrefs();
   const { id } = useParams({ from: "/history_/$id" });
   const { data: shift, isLoading, isError, refetch, isFetching } = useShift(id);
   const { data: events = [] } = useEvents();
@@ -84,7 +86,7 @@ function ShiftDetail() {
               </span>
               <span className="truncate text-sm text-muted-foreground">Distance driven</span>
               <span className="truncate text-sm font-bold">
-                {miles !== null ? `${miles.toFixed(1)} mi` : "In progress"}
+                {miles !== null ? fmt.mi(miles) : "In progress"}
               </span>
             </div>
 
@@ -119,10 +121,7 @@ function ShiftDetail() {
                       </span>
                     </span>
                     <Pill tone={failed ? "destructive" : "success"}>
-                      {new Date(event.created_at).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {fmt.time(event.created_at)}
                     </Pill>
                   </li>
                 );

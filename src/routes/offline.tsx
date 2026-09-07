@@ -12,6 +12,7 @@ import {
   useStops,
   useSyncQueue,
 } from "@/lib/pulse-data";
+import { useUnitPrefs } from "@/lib/units";
 
 const LAST_SYNC_KEY = "pulseroute.lastSync.v1";
 
@@ -36,6 +37,7 @@ export const Route = createFileRoute("/offline")({
 });
 
 function OfflineScreen() {
+  const fmt = useUnitPrefs();
   const offline = useOfflineMode();
   const queue = useQueue();
   const sync = useSyncQueue();
@@ -82,7 +84,7 @@ function OfflineScreen() {
             title="Everything synced"
             body={
               lastSync
-                ? `Last synced with dispatch at ${new Date(lastSync).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}. Nothing is waiting on the device.`
+                ? `Last synced with dispatch at ${fmt.time(lastSync)}. Nothing is waiting on the device.`
                 : "Nothing is waiting on the device. Completed drop-offs go straight to dispatch."
             }
           />
@@ -100,10 +102,7 @@ function OfflineScreen() {
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-bold">{item.recipient}</span>
                   <span className="block truncate text-xs text-muted-foreground">
-                    {new Date(item.createdAt).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}{" "}
+                    {fmt.time(item.createdAt)}{" "}
                     •{" "}
                     {item.eventType === "delivered"
                       ? "Signature & GPS stamped"

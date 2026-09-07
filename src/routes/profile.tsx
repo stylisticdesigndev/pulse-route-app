@@ -24,6 +24,7 @@ import {
   useMessages,
   useOfflineMode,
 } from "@/lib/pulse-data";
+import { useUnitPrefs } from "@/lib/units";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/profile")({
 });
 
 function Profile() {
+  const fmt = useUnitPrefs();
   const { data: shift } = useActiveShift();
   const { data: driver } = useDriver();
   const { data: messages = [] } = useMessages();
@@ -95,7 +97,7 @@ function Profile() {
         <Row
           icon={<Gauge className="h-5 w-5 text-muted-foreground" />}
           label="Odometer at start"
-          value={shift?.odometer_start ? `${Number(shift.odometer_start).toLocaleString()} mi` : "—"}
+          value={shift?.odometer_start ? fmt.mi(Number(shift.odometer_start)) : "—"}
         />
         <Row
           icon={<CloudOff className={`h-5 w-5 ${offline ? "text-warning" : "text-success"}`} />}
