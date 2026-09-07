@@ -36,9 +36,22 @@ function SignIn() {
   async function signInDemo() {
     setBusy("demo");
     try {
-      const { tokenHash, email: demoEmail } = await demoSession();
-      const { error } = await supabase.auth.verifyOtp({ type: "email", token_hash: tokenHash });
-      if (error) throw error;
+      const { tokenHash, email: demoEmail, password } = await demoSession();
+
+      let signedIn = false;
+      if (tokenHash) {
+        const { error } = await supabase.auth.verifyOtp({ type: "email", token_hash: tokenHash });
+        signedIn = !error;
+      }
+      if (!signedIn) {
+        // Fallback: sign in with the freshly provisioned demo password.
+        const { error } = await supabase.auth.signInWithPassword({
+          email: demoEmail,
+          password,
+        });
+        if (error) throw error;
+      }
+
       toast.success(`Signed in as demo courier (${demoEmail})`);
       navigate({ to: "/" });
     } catch {
@@ -47,6 +60,7 @@ function SignIn() {
       setBusy(null);
     }
   }
+
 
   async function signInPassword(event: React.FormEvent) {
     event.preventDefault();
