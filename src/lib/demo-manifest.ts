@@ -134,7 +134,7 @@ export const DEMO_STOPS: DemoStop[] = SEEDS.map((seed) => ({
   window_start: seed.window[0],
   zip_code: seed.zip,
   route: ROUTE,
-})) as unknown as StopWithRoute[];
+})) as unknown as DemoStop[];
 
 export const DEMO_SHIFT = {
   id: "demo-shift-rt-8842",
