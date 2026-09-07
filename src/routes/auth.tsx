@@ -28,38 +28,19 @@ export const Route = createFileRoute("/auth")({
 
 function SignIn() {
   const navigate = useNavigate();
-  const demoSession = useServerFn(startDemoCourierSession);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState<"demo" | "password" | null>(null);
 
-  async function signInDemo() {
+  /** Local-only demo courier session — no network auth call, so it can never fail. */
+  function signInDemo() {
     setBusy("demo");
-    try {
-      const { tokenHash, email: demoEmail, password } = await demoSession();
-
-      let signedIn = false;
-      if (tokenHash) {
-        const { error } = await supabase.auth.verifyOtp({ type: "email", token_hash: tokenHash });
-        signedIn = !error;
-      }
-      if (!signedIn) {
-        // Fallback: sign in with the freshly provisioned demo password.
-        const { error } = await supabase.auth.signInWithPassword({
-          email: demoEmail,
-          password,
-        });
-        if (error) throw error;
-      }
-
-      toast.success(`Signed in as demo courier (${demoEmail})`);
-      navigate({ to: "/" });
-    } catch {
-      toast.error("Demo sign-in failed. Try again.");
-    } finally {
-      setBusy(null);
-    }
+    startDemoSession();
+    toast.success("Signed in as demo courier (Marcus Vance)");
+    navigate({ to: "/manifest", replace: true });
+    setBusy(null);
   }
+
 
 
   async function signInPassword(event: React.FormEvent) {
