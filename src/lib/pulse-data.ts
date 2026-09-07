@@ -3,7 +3,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { isDemoSession } from "@/lib/demo-session";
-import { DEMO_PACKAGES, DEMO_SHIFT, DEMO_STOPS } from "@/lib/demo-manifest";
+import {
+  DEMO_PACKAGES,
+  DEMO_STOPS,
+  demoPatchPackage,
+  demoPatchShift,
+  demoPatchStop,
+  demoState,
+} from "@/lib/demo-manifest";
 
 export type Stop = Tables<"stops">;
 export type Package = Tables<"packages">;
@@ -187,10 +194,10 @@ export function useActiveShift() {
           .limit(1);
         if (error) throw error;
         const row = (data?.[0] ?? null) as Shift | null;
-        if (!row && demo) return DEMO_SHIFT as Shift;
+        if (!row && demo) return demoState.shift as Shift;
         return row;
       } catch (error) {
-        if (demo) return DEMO_SHIFT as Shift;
+        if (demo) return demoState.shift as Shift;
         throw error;
       }
     },
@@ -201,6 +208,10 @@ export function useStartShift() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (odometer: number) => {
+      if (isDemoSession()) {
+        demoPatchShift({ odometer_start: odometer, status: "active", ended_at: null });
+        return demoState.shift as Shift;
+      }
       const { data, error } = await supabase
         .from("shifts")
         .insert({
@@ -224,6 +235,10 @@ export function useEndShift() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (shiftId: string) => {
+      if (isDemoSession()) {
+        demoPatchShift({ status: "complete", ended_at: new Date().toISOString() });
+        return;
+      }
       const { error } = await supabase
         .from("shifts")
         .update({ status: "complete", ended_at: new Date().toISOString() })
@@ -238,6 +253,10 @@ export function useScanPackage() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (packageId: string) => {
+      if (isDemoSession()) {
+        demoPatchPackage(packageId, { scanned: true });
+        return;
+      }
       const { error } = await supabase
         .from("packages")
         .update({ scanned: true })
@@ -252,6 +271,10 @@ export function useSetStopStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ stopId, status }: { stopId: string; status: string }) => {
+      if (isDemoSession()) {
+        demoPatchStop(stopId, { status });
+        return;
+      }
       const { error } = await supabase.from("stops").update({ status }).eq("id", stopId);
       if (error) throw error;
     },
@@ -262,6 +285,13 @@ export function useSetStopStatus() {
 type SubmitInput = Omit<QueuedEvent, "localId" | "createdAt">;
 
 async function pushEvent(event: SubmitInput, shiftId: string | null) {
+  if (isDemoSession()) {
+    demoPatchStop(event.stopId, {
+      status: event.eventType === "exception" ? "exception" : "completed",
+      completed_at: new Date().toISOString(),
+    });
+    return;
+  }
   const { error } = await supabase.from("delivery_events").insert({
     stop_id: event.stopId,
     shift_id: shiftId,
@@ -439,12 +469,17 @@ export function useMessages() {
   return useQuery({
     queryKey: ["messages"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("dispatch_messages")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as DispatchMessage[];
+      try {
+        const { data, error } = await supabase
+          .from("dispatch_messages")
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        return data as DispatchMessage[];
+      } catch (error) {
+        if (isDemoSession()) return [] as DispatchMessage[];
+        throw error;
+      }
     },
   });
 }
@@ -453,6 +488,7 @@ export function useMarkMessagesRead() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
+      if (isDemoSession()) return;
       const { error } = await supabase.rpc("mark_dispatch_messages_read");
       if (error) throw error;
     },
@@ -474,6 +510,14 @@ export function useSetBreak() {
       start: boolean;
       seconds?: number;
     }) => {
+      if (isDemoSession()) {
+        demoPatchShift(
+          start
+            ? { status: "paused", break_started_at: new Date().toISOString() }
+            : { status: "active", break_started_at: null, break_seconds: seconds },
+        );
+        return;
+      }
       const { error } = await supabase
         .from("shifts")
         .update(
@@ -527,6 +571,10 @@ export function useSetPackageFlags() {
       packageId: string;
       patch: { returned?: boolean; delivered?: boolean; scanned?: boolean };
     }) => {
+      if (isDemoSession()) {
+        demoPatchPackage(packageId, patch);
+        return;
+      }
       const { error } = await supabase.from("packages").update(patch).eq("id", packageId);
       if (error) throw error;
     },
@@ -539,6 +587,10 @@ export function useReattemptStop() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ stopId, nextSeq }: { stopId: string; nextSeq: number }) => {
+      if (isDemoSession()) {
+        demoPatchStop(stopId, { status: "pending", completed_at: null, seq: nextSeq });
+        return;
+      }
       const { error } = await supabase
         .from("stops")
         .update({ status: "pending", completed_at: null, seq: nextSeq })
@@ -584,6 +636,7 @@ export function useSendDispatchNote() {
       stopId?: string | null;
       kind?: string;
     }) => {
+      if (isDemoSession()) return;
       const { data: auth } = await supabase.auth.getUser();
       const { error } = await supabase.from("dispatch_messages").insert({
         title,
