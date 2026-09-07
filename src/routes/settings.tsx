@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CloudOff, Flashlight, Gauge, LogOut, Navigation, Ruler, Vibrate } from "lucide-react";
+import { Clock, CloudOff, Flashlight, Gauge, LogOut, Navigation, Ruler, Vibrate } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, Pill, ScreenHeader } from "@/components/pulse/shell";
 import { supabase } from "@/integrations/supabase/client";
 import { endDemoSession } from "@/lib/demo-session";
 import { setOfflineMode, useDriver, useOfflineMode, useUpdateDriver } from "@/lib/pulse-data";
+import { useUnitPrefs } from "@/lib/units";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -29,6 +30,7 @@ function Settings() {
   const { data: driver } = useDriver();
   const update = useUpdateDriver();
   const offline = useOfflineMode();
+  const fmt = useUnitPrefs();
 
   function patch(next: Parameters<typeof update.mutate>[0]["patch"], label: string) {
     if (!driver) return;
