@@ -3,6 +3,7 @@ import { CalendarClock, ChevronRight, History as HistoryIcon } from "lucide-reac
 import { AppShell, Pill, ScreenHeader } from "@/components/pulse/shell";
 import { EmptyState, ErrorState } from "@/components/pulse/states";
 import { useShiftHistory } from "@/lib/pulse-data";
+import { useUnitPrefs } from "@/lib/units";
 
 export const Route = createFileRoute("/history")({
   head: () => ({
@@ -30,6 +31,7 @@ export function shiftDuration(startedAt: string, endedAt: string | null) {
 }
 
 function HistoryScreen() {
+  const fmt = useUnitPrefs();
   const { data: shifts = [], isLoading, isError, refetch, isFetching } = useShiftHistory();
 
   return (
@@ -77,10 +79,7 @@ function HistoryScreen() {
                 • #{shift.manifest_code}
               </span>
               <span className="block truncate text-xs text-muted-foreground">
-                {new Date(shift.started_at).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}{" "}
+                {fmt.time(shift.started_at)}{" "}
                 • {shiftDuration(shift.started_at, shift.ended_at)} • {shift.vehicle}
               </span>
             </span>

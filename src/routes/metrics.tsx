@@ -3,6 +3,7 @@ import { Activity, CloudOff, LineChart, TrendingUp } from "lucide-react";
 import { AppShell, BigButton, Pill, ScreenHeader } from "@/components/pulse/shell";
 import { EmptyState, ErrorState, OffShiftState } from "@/components/pulse/states";
 import { stopLabel, useActiveShift, useEvents, useQueue, useStops } from "@/lib/pulse-data";
+import { useUnitPrefs } from "@/lib/units";
 
 
 export const Route = createFileRoute("/metrics")({
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/metrics")({
 });
 
 function Metrics() {
+  const fmt = useUnitPrefs();
   const { data: stops = [] } = useStops();
   const { data: events = [], isLoading, isError, refetch, isFetching } = useEvents();
   const { data: shift, isLoading: shiftLoading } = useActiveShift();
@@ -112,10 +114,7 @@ function Metrics() {
                   </span>
                   <span className="block truncate text-xs text-muted-foreground">
                     {failed ? event.reason : "Proof of service captured"} •{" "}
-                    {new Date(event.created_at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {fmt.time(event.created_at)}
                   </span>
                 </span>
                 <Pill tone={failed ? "destructive" : "success"}>{failed ? "Exception" : "Synced"}</Pill>

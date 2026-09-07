@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { AppShell, Pill, ScreenHeader } from "@/components/pulse/shell";
 import { EmptyState, ErrorState } from "@/components/pulse/states";
 import { useMarkMessagesRead, useMessages } from "@/lib/pulse-data";
+import { useUnitPrefs } from "@/lib/units";
 
 export const Route = createFileRoute("/notifications")({
   head: () => ({
@@ -32,6 +33,7 @@ const ICONS = {
 } as const;
 
 function Notifications() {
+  const fmt = useUnitPrefs();
   const { data: messages = [], isLoading, isError, refetch, isFetching } = useMessages();
   const markRead = useMarkMessagesRead();
   const unread = messages.filter((m) => !m.read).length;
@@ -107,10 +109,7 @@ function Notifications() {
                 <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
                   <h2 className="truncate text-sm font-bold">{msg.title}</h2>
                   <span className="text-[11px] text-muted-foreground">
-                    {new Date(msg.created_at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {fmt.time(msg.created_at)}
                   </span>
                 </div>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{msg.body}</p>

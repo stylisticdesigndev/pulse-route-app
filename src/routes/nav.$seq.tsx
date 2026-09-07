@@ -27,6 +27,7 @@ import {
   useSubmitEvent,
   type Stop,
 } from "@/lib/pulse-data";
+import { useUnitPrefs } from "@/lib/units";
 
 export const Route = createFileRoute("/nav/$seq")({
   head: () => ({
@@ -55,6 +56,7 @@ const EXCEPTION_REASONS = [
 ];
 
 function NavigationScreen() {
+  const fmt = useUnitPrefs();
   const { seq } = Route.useParams();
   const navigate = useNavigate();
   const { data: stops = [] } = useStops();

@@ -3,6 +3,7 @@ import { Clock, Gauge, LineChart, TriangleAlert } from "lucide-react";
 import { AppShell, Pill, ScreenHeader } from "@/components/pulse/shell";
 import { EmptyState, ErrorState } from "@/components/pulse/states";
 import { stopLabel, useEvents, useStops } from "@/lib/pulse-data";
+import { useUnitPrefs } from "@/lib/units";
 
 export const Route = createFileRoute("/performance")({
   head: () => ({

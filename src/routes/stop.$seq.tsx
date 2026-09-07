@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { AppShell, BigButton, Pill, ScreenHeader } from "@/components/pulse/shell";
 import { stopLabel, usePackages, useReattemptStop, useStops } from "@/lib/pulse-data";
+import { useUnitPrefs } from "@/lib/units";
 
 
 export const Route = createFileRoute("/stop/$seq")({
@@ -37,6 +38,7 @@ export const Route = createFileRoute("/stop/$seq")({
 });
 
 function StopDetail() {
+  const fmt = useUnitPrefs();
   const { seq } = Route.useParams();
   const navigate = useNavigate();
   const { data: stops = [] } = useStops();
