@@ -1,11 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { HardHat, Lock, Navigation, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell, BigButton } from "@/components/pulse/shell";
 import { supabase } from "@/integrations/supabase/client";
-import { startDemoCourierSession } from "@/lib/demo-auth.functions";
+import { startDemoSession } from "@/lib/demo-session";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
