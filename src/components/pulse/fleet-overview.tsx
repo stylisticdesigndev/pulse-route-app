@@ -36,6 +36,7 @@ function batteryIcon(level: number) {
 
 /** Dispatch supervisor fleet dashboard shown when the developer role is switched. */
 export function FleetOverview() {
+  const fmt = useUnitPrefs();
   const { data: stops = [] } = useStops();
   const activeStop =
     stops.find((s) => s.status === "in_transit") ?? stops.find((s) => s.status === "pending");
