@@ -89,15 +89,28 @@ function Settings() {
         />
         <Toggle
           icon={<Ruler className="h-4 w-4 text-muted-foreground" />}
-          label={driver?.units === "metric" ? "Units: metric (km)" : "Units: imperial (mi)"}
-          on={driver?.units === "metric"}
-          onToggle={() =>
-            patch(
-              { units: driver?.units === "metric" ? "imperial" : "metric" },
-              driver?.units === "metric" ? "Switched to miles" : "Switched to kilometres",
-            )
+          label={
+            fmt.isMetric ? "Distances: kilometres (km)" : "Distances: US miles (mi)"
           }
+          on={fmt.isMetric}
+          onToggle={() => {
+            const next = fmt.isMetric ? "imperial" : "metric";
+            fmt.setUnits(next);
+            if (driver) update.mutate({ id: driver.id, patch: { units: next } });
+            toast.success(next === "metric" ? "Switched to kilometres" : "Switched to miles");
+          }}
         />
+        <Toggle
+          icon={<Clock className="h-4 w-4 text-muted-foreground" />}
+          label={fmt.is24h ? "Time: 24-hour clock" : "Time: 12-hour clock (AM/PM)"}
+          on={fmt.is24h}
+          onToggle={() => {
+            const next = fmt.is24h ? "12h" : "24h";
+            fmt.setClock(next);
+            toast.success(next === "24h" ? "Switched to 24-hour time" : "Switched to 12-hour time");
+          }}
+        />
+
 
         <p className="px-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
           Connectivity
