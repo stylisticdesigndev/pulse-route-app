@@ -176,3 +176,21 @@ export const DEMO_PACKAGES = DEMO_STOPS.flatMap((stop, index) => [
     weight_lbs: 22 + index * 3,
   },
 ]) as unknown as Tables<"packages">[];
+
+/* ------------------- local mutations for the demo session ------------------- */
+
+export const demoState = { shift: { ...DEMO_SHIFT } as Tables<"shifts">, shiftOpen: true };
+
+export function demoPatchShift(patch: Partial<Tables<"shifts">>) {
+  demoState.shift = { ...demoState.shift, ...patch };
+}
+
+export function demoPatchStop(stopId: string, patch: Partial<Tables<"stops">>) {
+  const stop = DEMO_STOPS.find((item) => item.id === stopId);
+  if (stop) Object.assign(stop, patch);
+}
+
+export function demoPatchPackage(packageId: string, patch: Partial<Tables<"packages">>) {
+  const pkg = DEMO_PACKAGES.find((item) => item.id === packageId);
+  if (pkg) Object.assign(pkg, patch);
+}
