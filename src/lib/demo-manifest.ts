@@ -1,4 +1,11 @@
-import type { Package, Shift, StopWithRoute } from "@/lib/pulse-data";
+import type { Tables } from "@/integrations/supabase/types";
+
+type DemoStop = Tables<"stops"> & {
+  route: Pick<
+    Tables<"routes">,
+    "id" | "code" | "status" | "scheduled_date" | "total_distance_miles" | "estimated_duration_minutes"
+  > | null;
+};
 
 const ROUTE = {
   id: "demo-route-rt-8842",
@@ -97,7 +104,7 @@ const SEEDS: DemoStopSeed[] = [
   },
 ];
 
-export const DEMO_STOPS: StopWithRoute[] = SEEDS.map((seed) => ({
+export const DEMO_STOPS: DemoStop[] = SEEDS.map((seed) => ({
   id: `demo-stop-${seed.seq}`,
   access_notes: seed.notes,
   address: seed.address,
@@ -143,7 +150,7 @@ export const DEMO_SHIFT = {
   started_at: new Date().toISOString(),
   status: "active",
   vehicle: "Van #408 - Ford Transit",
-} as unknown as Shift;
+} as unknown as Tables<"shifts">;
 
 export const DEMO_PACKAGES = DEMO_STOPS.flatMap((stop, index) => [
   {
@@ -168,4 +175,4 @@ export const DEMO_PACKAGES = DEMO_STOPS.flatMap((stop, index) => [
     stop_id: stop.id,
     weight_lbs: 22 + index * 3,
   },
-]) as unknown as Package[];
+]) as unknown as Tables<"packages">[];
