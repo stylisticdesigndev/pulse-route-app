@@ -3,6 +3,7 @@ import { CloudOff, Flashlight, Gauge, LogOut, Navigation, Ruler, Vibrate } from 
 import { toast } from "sonner";
 import { AppShell, Pill, ScreenHeader } from "@/components/pulse/shell";
 import { supabase } from "@/integrations/supabase/client";
+import { endDemoSession } from "@/lib/demo-session";
 import { setOfflineMode, useDriver, useOfflineMode, useUpdateDriver } from "@/lib/pulse-data";
 
 export const Route = createFileRoute("/settings")({
@@ -118,6 +119,7 @@ function Settings() {
         </Link>
         <button
           onClick={async () => {
+            endDemoSession();
             await supabase.auth.signOut();
             toast.message("Signed out");
           }}
