@@ -171,12 +171,17 @@ export function useEvents() {
   return useQuery({
     queryKey: ["events"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("delivery_events")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from("delivery_events")
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        if (isDemoSession()) return [];
+        throw error;
+      }
     },
   });
 }
@@ -379,13 +384,39 @@ export function useDriver() {
   return useQuery({
     queryKey: ["driver"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("drivers")
-        .select("*")
-        .order("created_at", { ascending: true })
-        .limit(1);
-      if (error) throw error;
-      return (data?.[0] ?? null) as Driver | null;
+      const demoDriver = () =>
+        ({
+          id: "demo-driver-marcus-vance",
+          driver_code: DRIVER.code,
+          display_name: DRIVER.name,
+          company: DRIVER.company,
+          phone: "(317) 555-0100",
+          emergency_contact: "Dana Ruiz • (317) 555-0111",
+          language: "English",
+          vehicle: DRIVER.vehicle,
+          avatar_path: null,
+          nav_preference: "built_in",
+          torch_default: false,
+          haptics: true,
+          units: "imperial",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          user_id: null,
+        }) as unknown as Driver;
+      try {
+        const { data, error } = await supabase
+          .from("drivers")
+          .select("*")
+          .order("created_at", { ascending: true })
+          .limit(1);
+        if (error) throw error;
+        const row = (data?.[0] ?? null) as Driver | null;
+        if (!row && isDemoSession()) return demoDriver();
+        return row;
+      } catch (error) {
+        if (isDemoSession()) return demoDriver();
+        throw error;
+      }
     },
   });
 }
@@ -538,12 +569,19 @@ export function useShiftHistory() {
   return useQuery({
     queryKey: ["shift-history"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("shifts")
-        .select("*")
-        .order("started_at", { ascending: false });
-      if (error) throw error;
-      return data as Shift[];
+      try {
+        const { data, error } = await supabase
+          .from("shifts")
+          .select("*")
+          .order("started_at", { ascending: false });
+        if (error) throw error;
+        const rows = data as Shift[];
+        if (!rows.length && isDemoSession()) return [demoState.shift as Shift];
+        return rows;
+      } catch (error) {
+        if (isDemoSession()) return [demoState.shift as Shift];
+        throw error;
+      }
     },
   });
 }
