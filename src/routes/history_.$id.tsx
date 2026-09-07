@@ -86,7 +86,7 @@ function ShiftDetail() {
               </span>
               <span className="truncate text-sm text-muted-foreground">Distance driven</span>
               <span className="truncate text-sm font-bold">
-                {miles !== null ? `${miles.toFixed(1)} mi` : "In progress"}
+                {miles !== null ? fmt.mi(miles) : "In progress"}
               </span>
             </div>
 

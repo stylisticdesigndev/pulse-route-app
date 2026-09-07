@@ -41,7 +41,7 @@ function SummaryScreen() {
   const failed = stops.filter((s) => s.status === "exception").length;
   const total = stops.length;
   const onTime = total ? Math.min(99.9, 80 + (delivered / total) * 19).toFixed(1) : "0.0";
-  const miles = (delivered * 8.55).toFixed(1);
+  const miles = delivered * 8.55;
   const startedAt = shift?.started_at ? new Date(shift.started_at) : null;
   const hours = startedAt ? (Date.now() - startedAt.getTime()) / 36e5 : 0;
   const duration = `${Math.floor(hours)}h ${Math.floor((hours % 1) * 60)}m`;
@@ -84,7 +84,7 @@ function SummaryScreen() {
             tone="success"
           />
           <Metric label="On-time rate" value={`${onTime}%`} note="Target 92%" tone="success" />
-          <Metric label="Total miles" value={`${miles} mi`} note="Optimal routing efficiency" />
+          <Metric label={fmt.isMetric ? "Total distance" : "Total miles"} value={fmt.mi(miles)} note="Optimal routing efficiency" />
           <Metric label="Shift duration" value={duration} note="Within DOT 10hr limits" />
         </div>
 

@@ -84,7 +84,7 @@ function OfflineScreen() {
             title="Everything synced"
             body={
               lastSync
-                ? `Last synced with dispatch at ${new Date(lastSync).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}. Nothing is waiting on the device.`
+                ? `Last synced with dispatch at ${fmt.time(lastSync)}. Nothing is waiting on the device.`
                 : "Nothing is waiting on the device. Completed drop-offs go straight to dispatch."
             }
           />

@@ -78,7 +78,7 @@ function DriverAuth() {
           </div>
           <p className="mt-2 text-xl font-bold">{DRIVER.vehicle}</p>
           <p className="mt-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Current Odometer (miles)
+            Current Odometer ({fmt.isMetric ? "kilometres" : "miles"})
           </p>
           <div className="mt-2 flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3">
             <input
