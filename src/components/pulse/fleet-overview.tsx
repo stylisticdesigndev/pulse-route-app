@@ -4,6 +4,7 @@ import { AppShell, BigButton, Pill, ScreenHeader } from "@/components/pulse/shel
 import { MapCanvas } from "@/components/pulse/map-canvas";
 import { stopLabel, useStops } from "@/lib/pulse-data";
 import { cn } from "@/lib/utils";
+import { useUnitPrefs } from "@/lib/units";
 
 const MARKERS = [
   { id: "408", left: "34%", top: "62%" },
@@ -93,7 +94,7 @@ export function FleetOverview() {
                       {r.code} • {r.sector}
                     </p>
                     <p className="truncate text-xs text-muted-foreground">
-                      {r.stops} stops • {r.window}
+                      {r.stops} stops • {r.window.split(" – ").map((t) => fmt.clockString(t)).join(" – ")}
                     </p>
                   </div>
                   <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
