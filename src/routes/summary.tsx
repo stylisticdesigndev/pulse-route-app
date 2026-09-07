@@ -10,6 +10,7 @@ import {
   useEvents,
   useStops,
 } from "@/lib/pulse-data";
+import { useUnitPrefs } from "@/lib/units";
 
 export const Route = createFileRoute("/summary")({
   head: () => ({
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/summary")({
 });
 
 function SummaryScreen() {
+  const fmt = useUnitPrefs();
   const navigate = useNavigate();
   const { data: stops = [] } = useStops();
   const { data: events = [] } = useEvents();

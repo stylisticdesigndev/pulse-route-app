@@ -24,6 +24,7 @@ import {
   useMessages,
   useOfflineMode,
 } from "@/lib/pulse-data";
+import { useUnitPrefs } from "@/lib/units";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/profile")({
 });
 
 function Profile() {
+  const fmt = useUnitPrefs();
   const { data: shift } = useActiveShift();
   const { data: driver } = useDriver();
   const { data: messages = [] } = useMessages();

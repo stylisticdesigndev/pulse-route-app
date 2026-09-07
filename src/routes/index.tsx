@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell, BigButton, Pill } from "@/components/pulse/shell";
 import { DRIVER, useStartShift } from "@/lib/pulse-data";
+import { useUnitPrefs } from "@/lib/units";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -34,6 +35,7 @@ const CHECKS = [
 ];
 
 function DriverAuth() {
+  const fmt = useUnitPrefs();
   const navigate = useNavigate();
   const [odometer, setOdometer] = useState("42,890.4");
   const [checked, setChecked] = useState<boolean[]>(() => CHECKS.map(() => true));
