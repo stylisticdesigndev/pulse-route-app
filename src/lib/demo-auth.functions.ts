@@ -59,14 +59,25 @@ export const startDemoCourierSession = createServerFn({ method: "POST" }).handle
   await supabaseAdmin.from("drivers").update({ user_id: user.id }).is("user_id", null);
   await supabaseAdmin.from("shifts").update({ driver_user_id: user.id }).is("driver_user_id", null);
 
-  const { data: link, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-    type: "magiclink",
-    email: DEMO_EMAIL,
+  // Always reset the demo password so password sign-in is a guaranteed fallback
+  // even when the magic-link token path is unavailable.
+  const demoPassword = "ApexMove-Demo-Courier-2026";
+  await supabaseAdmin.auth.admin.updateUserById(user.id, {
+    password: demoPassword,
+    email_confirm: true,
   });
-  if (linkError) throw linkError;
 
-  const tokenHash = link.properties?.hashed_token;
-  if (!tokenHash) throw new Error("Could not create a demo session token.");
+  let tokenHash: string | null = null;
+  try {
+    const { data: link } = await supabaseAdmin.auth.admin.generateLink({
+      type: "magiclink",
+      email: DEMO_EMAIL,
+    });
+    tokenHash = link?.properties?.hashed_token ?? null;
+  } catch {
+    tokenHash = null;
+  }
 
-  return { tokenHash, email: DEMO_EMAIL };
+  return { tokenHash, email: DEMO_EMAIL, password: demoPassword };
 });
+
