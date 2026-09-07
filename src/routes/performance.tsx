@@ -32,6 +32,7 @@ function minutesOfDay(hhmm: string) {
 function Performance() {
   const { data: stops = [], isLoading, isError, refetch, isFetching } = useStops();
   const { data: events = [] } = useEvents();
+  const fmt = useUnitPrefs();
 
   const closed = stops.filter((s) => s.status === "completed" || s.status === "exception");
   const delivered = stops.filter((s) => s.status === "completed");
@@ -128,13 +129,8 @@ function Performance() {
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-bold">{stop.recipient}</span>
                     <span className="block truncate text-xs text-muted-foreground">
-                      Window {stop.window_start}–{stop.window_end} • closed{" "}
-                      {at
-                        ? new Date(at).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : "—"}
+                      Window {fmt.clockString(stop.window_start)}–{fmt.clockString(stop.window_end)} • closed{" "}
+                      {fmt.time(at)}
                     </span>
                   </span>
                   <Pill tone={onTime === null ? "muted" : onTime ? "success" : "warning"}>

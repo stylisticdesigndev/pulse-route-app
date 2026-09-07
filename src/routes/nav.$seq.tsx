@@ -121,7 +121,7 @@ function NavigationScreen() {
                   onto {stop.address.replace(/^\d+\s/, "")}
                 </span>
                 <span className="block text-xs font-bold text-success">
-                  ETA {stop.eta} • {stop.distance_km} km
+                  ETA {fmt.clockString(stop.eta)} • {fmt.km(stop.distance_km)}
                 </span>
               </span>
             </div>
