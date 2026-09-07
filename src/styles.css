@@ -114,12 +114,19 @@
 }
 
 @utility safe-top {
-  padding-top: max(env(safe-area-inset-top), 0.75rem);
+  padding-top: max(env(safe-area-inset-top), 1rem);
 }
 
 @utility safe-bottom {
-  padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+  padding-bottom: max(env(safe-area-inset-bottom), 1rem);
 }
+
+/* Toasts + top alert banners must clear the notch / Dynamic Island. */
+[data-sonner-toaster][data-y-position="top"] {
+  padding-top: max(1rem, env(safe-area-inset-top));
+  margin-top: env(safe-area-inset-top);
+}
+
 
 @utility no-scrollbar {
   scrollbar-width: none;
