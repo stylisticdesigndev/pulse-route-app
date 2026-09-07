@@ -111,16 +111,24 @@ export function useStops() {
   return useQuery({
     queryKey: stopsQueryKey(),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("stops")
-        .select(
-          "*, route:routes!inner(id, code, status, scheduled_date, total_distance_miles, estimated_duration_minutes)",
-        )
-        .in("routes.status", ["active", "assigned"])
-        .order("sequence_order", { ascending: true, nullsFirst: false })
-        .order("seq", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as unknown as StopWithRoute[];
+      const demo = isDemoSession();
+      try {
+        const { data, error } = await supabase
+          .from("stops")
+          .select(
+            "*, route:routes!inner(id, code, status, scheduled_date, total_distance_miles, estimated_duration_minutes)",
+          )
+          .in("routes.status", ["active", "assigned"])
+          .order("sequence_order", { ascending: true, nullsFirst: false })
+          .order("seq", { ascending: true });
+        if (error) throw error;
+        const rows = (data ?? []) as unknown as StopWithRoute[];
+        if (!rows.length && demo) return DEMO_STOPS;
+        return rows;
+      } catch (error) {
+        if (demo) return DEMO_STOPS;
+        throw error;
+      }
     },
   });
 }
@@ -130,10 +138,20 @@ export function usePackages(stopId?: string) {
   return useQuery({
     queryKey: ["packages", stopId ?? "all"],
     queryFn: async () => {
-      const query = supabase.from("packages").select("*").order("code");
-      const { data, error } = stopId ? await query.eq("stop_id", stopId) : await query;
-      if (error) throw error;
-      return data as Package[];
+      const demo = isDemoSession();
+      const fallback = () =>
+        stopId ? DEMO_PACKAGES.filter((pkg) => pkg.stop_id === stopId) : DEMO_PACKAGES;
+      try {
+        const query = supabase.from("packages").select("*").order("code");
+        const { data, error } = stopId ? await query.eq("stop_id", stopId) : await query;
+        if (error) throw error;
+        const rows = (data ?? []) as Package[];
+        if (!rows.length && demo) return fallback();
+        return rows;
+      } catch (error) {
+        if (demo) return fallback();
+        throw error;
+      }
     },
   });
 }
