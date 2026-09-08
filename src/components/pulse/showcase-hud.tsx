@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { useShowcase } from "@/lib/showcase-context";
 import { ALL_STEPS } from "@/lib/showcase-context";
@@ -32,6 +33,9 @@ export function ShowcaseHud() {
     goToRole,
   } = useShowcase();
   const [collapsed, setCollapsed] = useState(false);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  if (pathname === "/auth") return null;
 
   if (!active) {
     return (

@@ -150,14 +150,14 @@ function RootComponent() {
 
     <QueryClientProvider client={queryClient}>
       <RoleProvider>
-        <AuthGate>
-          <ShowcaseProvider>
+        <ShowcaseProvider>
+          <AuthGate>
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
             <RoleSwitcher />
             <ShowcaseHud />
-          </ShowcaseProvider>
-        </AuthGate>
+          </AuthGate>
+        </ShowcaseProvider>
       </RoleProvider>
       <Toaster position="top-center" theme="dark" richColors />
     </QueryClientProvider>
