@@ -16,6 +16,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { RoleProvider } from "@/lib/role-context";
 import { RoleSwitcher } from "@/components/pulse/role-switcher";
+import { ShowcaseProvider } from "@/lib/showcase-context";
+import { ShowcaseHud } from "@/components/pulse/showcase-hud";
 import { registerServiceWorker } from "@/lib/register-sw";
 import { useSession } from "@/lib/auth-session";
 
@@ -148,11 +150,14 @@ function RootComponent() {
 
     <QueryClientProvider client={queryClient}>
       <RoleProvider>
-        <AuthGate>
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-          <RoleSwitcher />
-        </AuthGate>
+        <ShowcaseProvider>
+          <AuthGate>
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+            <RoleSwitcher />
+            <ShowcaseHud />
+          </AuthGate>
+        </ShowcaseProvider>
       </RoleProvider>
       <Toaster position="top-center" theme="dark" richColors />
     </QueryClientProvider>

@@ -5,6 +5,9 @@ import { MapCanvas } from "@/components/pulse/map-canvas";
 import { stopLabel, useStops } from "@/lib/pulse-data";
 import { cn } from "@/lib/utils";
 import { useUnitPrefs } from "@/lib/units";
+import { useShowcase } from "@/lib/showcase-context";
+import { demoHasPriorityStop } from "@/lib/demo-manifest";
+import { AlertTriangle, ArrowRightLeft, Leaf, TrendingUp } from "lucide-react";
 
 const MARKERS = [
   { id: "408", left: "34%", top: "62%" },
@@ -37,6 +40,8 @@ function batteryIcon(level: number) {
 /** Dispatch supervisor fleet dashboard shown when the developer role is switched. */
 export function FleetOverview() {
   const fmt = useUnitPrefs();
+  const { active: showcaseActive, step, jumpToCourierHandoff } = useShowcase();
+  const stepId = showcaseActive ? step?.id : undefined;
   const { data: stops = [] } = useStops();
   const activeStop =
     stops.find((s) => s.status === "in_transit") ?? stops.find((s) => s.status === "pending");
@@ -46,6 +51,64 @@ export function FleetOverview() {
       <ScreenHeader title="Fleet Overview" subtitle="Apex Move Dynamics • Dispatch console" />
 
       <div className="space-y-3 px-4 py-4">
+        {stepId === "anomaly" ? (
+          <section className="rounded-2xl border border-destructive/50 bg-destructive/10 p-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              <h2 className="text-xs font-bold uppercase tracking-widest text-destructive">
+                Priority alert — Route 4
+              </h2>
+            </div>
+            <p className="mt-2 text-sm font-bold">Delivery delayed 18 min • geofence breach</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Van #212 (Dana Whitfield) also raised a maintenance flag — brake wear sensor.
+            </p>
+            <div className="mt-3 flex gap-2">
+              <Pill tone="destructive">Critical</Pill>
+              <Pill tone="warning">Maintenance</Pill>
+            </div>
+          </section>
+        ) : null}
+
+        {stepId === "reassign" ? (
+          <section className="rounded-2xl border border-primary/50 bg-primary/10 p-4">
+            <div className="flex items-center gap-2">
+              <ArrowRightLeft className="h-4 w-4 text-primary" />
+              <h2 className="text-xs font-bold uppercase tracking-widest text-primary">
+                Route reassignment
+              </h2>
+            </div>
+            <p className="mt-2 text-sm font-bold">APX-9001 • Priority medical carton</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Moved from Route 4 (Van #212, delayed) to Marcus Vance — Van #408.
+              {demoHasPriorityStop() ? " Applied optimistically; courier notified." : ""}
+            </p>
+            <BigButton className="mt-3 h-12" onClick={jumpToCourierHandoff}>
+              Open Marcus Vance's manifest
+            </BigButton>
+          </section>
+        ) : null}
+
+        {stepId === "telemetry" ? (
+          <section className="rounded-2xl border border-success/50 bg-success/10 p-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-success" />
+              <h2 className="text-xs font-bold uppercase tracking-widest text-success">
+                End-of-shift analytics
+              </h2>
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <Metric label="Stops completed" value="171/180" tone="text-foreground" />
+              <Metric label="On-time rate" value="98%" tone="text-success" />
+              <Metric label="Carbon offset" value="41 kg" tone="text-success" />
+            </div>
+            <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Leaf className="h-3.5 w-3.5 text-success" /> Aggregated locally from the shift event
+              log — executive summary ready to export.
+            </p>
+          </section>
+        ) : null}
+
         <div className="grid grid-cols-3 gap-2">
           <Metric label="Active drivers" value="8/10" tone="text-success" />
           <Metric label="Stops cleared" value="142/180" tone="text-foreground" />

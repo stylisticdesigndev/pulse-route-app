@@ -194,3 +194,45 @@ export function demoPatchPackage(packageId: string, patch: Partial<Tables<"packa
   const pkg = DEMO_PACKAGES.find((item) => item.id === packageId);
   if (pkg) Object.assign(pkg, patch);
 }
+
+/** Portfolio showcase: dispatch reassigns a priority parcel onto Marcus Vance's manifest. */
+export function demoInjectPriorityStop() {
+  const id = "demo-stop-priority-apx-9001";
+  if (DEMO_STOPS.some((s) => s.id === id)) return;
+  const base = DEMO_STOPS[0] as unknown as Record<string, unknown>;
+  const seq = Math.max(...DEMO_STOPS.map((s) => s.seq ?? 0)) + 1;
+  DEMO_STOPS.push({
+    ...(base as object),
+    id,
+    seq,
+    sequence_order: seq,
+    status: "pending",
+    completed_at: null,
+    recipient: "Odette Marchand",
+    recipient_name: "Odette Marchand",
+    address: "88 Wabash Ave, Suite 1200",
+    address_line1: "88 Wabash Ave, Suite 1200",
+    city: "Indianapolis",
+    zip_code: "46204",
+    sector: "Midtown Loop",
+    window_start: "15:00",
+    window_end: "16:30",
+    delivery_notes: "Priority reassignment from Route 4 — signature required.",
+    gate_code: null,
+  } as unknown as (typeof DEMO_STOPS)[number]);
+  DEMO_PACKAGES.push({
+    id: "demo-pkg-priority-9001",
+    code: "APX-9001",
+    delivered: false,
+    description: "Priority medical carton",
+    kind: "box",
+    returned: false,
+    scanned: false,
+    stop_id: id,
+    weight_lbs: 9,
+  } as unknown as (typeof DEMO_PACKAGES)[number]);
+}
+
+export function demoHasPriorityStop() {
+  return DEMO_STOPS.some((s) => s.id === "demo-stop-priority-apx-9001");
+}
