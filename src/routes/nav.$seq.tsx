@@ -71,6 +71,7 @@ function NavigationScreen() {
   const [confirmFar, setConfirmFar] = useState(false);
   const setStatus = useSetStopStatus();
   const proximity = gpsWeak ? 184 : 12;
+  const ghost = useGhost();
 
   async function beginProof() {
     if (!stop) return;
