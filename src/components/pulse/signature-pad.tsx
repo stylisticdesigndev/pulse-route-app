@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 
 /** Touch/mouse signature capture. Reports the encoded path whenever it changes. */
-export function SignaturePad({ onChange }: { onChange: (path: string | null) => void }) {
+export function SignaturePad({
+  onChange,
+  autoSign = false,
+}: {
+  onChange: (path: string | null) => void;
+  /** Scripted demo: draws a signature by itself so the flow can run hands-free. */
+  autoSign?: boolean;
+}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawing = useRef(false);
   const points = useRef<string[]>([]);
@@ -22,6 +29,46 @@ export function SignaturePad({ onChange }: { onChange: (path: string | null) => 
     ctx.lineJoin = "round";
     ctx.strokeStyle = "#34d399";
   }, []);
+
+  // Hands-free demo: trace a natural-looking signature stroke by stroke.
+  useEffect(() => {
+    if (!autoSign) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+    const path: { x: number; y: number }[] = [];
+    for (let i = 0; i <= 90; i += 1) {
+      const t = i / 90;
+      path.push({
+        x: w * (0.12 + t * 0.74),
+        y: h * (0.55 - Math.sin(t * Math.PI * 3) * 0.24 - t * 0.06),
+      });
+    }
+    let i = 0;
+    ctx.beginPath();
+    const timer = window.setInterval(() => {
+      const point = path[i];
+      if (!point) {
+        window.clearInterval(timer);
+        return;
+      }
+      if (i === 0) {
+        ctx.moveTo(point.x, point.y);
+        points.current.push(`M${Math.round(point.x)},${Math.round(point.y)}`);
+      } else {
+        ctx.lineTo(point.x, point.y);
+        ctx.stroke();
+        points.current.push(`L${Math.round(point.x)},${Math.round(point.y)}`);
+      }
+      setHasInk(true);
+      onChange(points.current.join(" "));
+      i += 1;
+    }, 12);
+    return () => window.clearInterval(timer);
+  }, [autoSign, onChange]);
 
   function pos(e: React.PointerEvent<HTMLCanvasElement>) {
     const rect = e.currentTarget.getBoundingClientRect();

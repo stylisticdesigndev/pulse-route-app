@@ -7,10 +7,13 @@ export function MapCanvas({
   variant = "overview",
   stopLabel,
   className,
+  driving = false,
 }: {
   variant?: Variant | undefined;
   stopLabel?: string | undefined;
   className?: string | undefined;
+  /** Animates the vehicle along the route polyline (scripted demo transit). */
+  driving?: boolean | undefined;
 }) {
   return (
     <div className={cn("relative h-full w-full overflow-hidden bg-map", className)}>
@@ -64,14 +67,25 @@ export function MapCanvas({
         ) : null}
 
         {variant === "turn" ? (
-          <polyline
-            points="130,510 130,280 260,280 260,60"
-            fill="none"
-            stroke="var(--primary)"
-            strokeWidth="9"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          <>
+            <polyline
+              points="130,510 130,280 260,280 260,60"
+              fill="none"
+              stroke="var(--primary)"
+              strokeWidth="9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            {driving ? (
+              <circle r="11" fill="var(--primary)" stroke="#ffffff" strokeWidth="3">
+                <animateMotion
+                  dur="5s"
+                  fill="freeze"
+                  path="M130,510 L130,280 L260,280 L260,60"
+                />
+              </circle>
+            ) : null}
+          </>
         ) : null}
 
         {variant === "reroute" ? (
@@ -107,7 +121,7 @@ export function MapCanvas({
         </>
       ) : null}
 
-      {variant === "turn" ? (
+      {variant === "turn" && !driving ? (
         <div className="absolute left-[34%] top-[52%] flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-lg">
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3">
             <path d="M4 20V10a4 4 0 0 1 4-4h9" />

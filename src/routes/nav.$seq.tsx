@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useGhost } from "@/lib/ghost-demo";
 import { toast } from "sonner";
 import { MapCanvas } from "@/components/pulse/map-canvas";
 import { SignaturePad } from "@/components/pulse/signature-pad";
@@ -70,6 +71,7 @@ function NavigationScreen() {
   const [confirmFar, setConfirmFar] = useState(false);
   const setStatus = useSetStopStatus();
   const proximity = gpsWeak ? 184 : 12;
+  const ghost = useGhost();
 
   async function beginProof() {
     if (!stop) return;
@@ -90,7 +92,14 @@ function NavigationScreen() {
   return (
     <AppShell className="flex flex-col">
       <div className="relative flex-1">
-        <MapCanvas variant={traffic ? "reroute" : "turn"} className="absolute inset-0" />
+        <MapCanvas
+          variant={traffic ? "reroute" : "turn"}
+          className="absolute inset-0"
+          driving={ghost.driving}
+        />
+
+        {ghost.driving ? <DriveHud totalKm={stop.distance_km ?? 4} /> : null}
+
 
         {traffic ? (
           <div className="safe-top absolute inset-x-3 top-0">
@@ -252,6 +261,7 @@ function NavigationScreen() {
           stop={stop}
           offline={offline}
           proximity={proximity}
+          autoSign={ghost.running}
           onClose={() => setSheet("none")}
           onDone={() => navigate({ to: "/manifest" })}
         />
@@ -300,16 +310,60 @@ function SheetFrame({
   );
 }
 
+/** Live speed / distance readout while the scripted vehicle drives the route. */
+function DriveHud({ totalKm }: { totalKm: number }) {
+  const fmt = useUnitPrefs();
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const started = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - started) / 5000);
+      setProgress(t);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const speed = Math.round(14 + Math.sin(progress * Math.PI) * 26);
+  const remaining = Math.max(0, totalKm * (1 - progress));
+
+  return (
+    <div className="pointer-events-none absolute inset-x-3 bottom-16 z-10">
+      <div className="grid grid-cols-3 gap-2 rounded-2xl border border-primary/40 bg-card/95 p-3 backdrop-blur">
+        <Stat label="Speed" value={`${speed} mph`} />
+        <Stat label="Remaining" value={fmt.km(remaining)} />
+        <Stat label="Arriving" value={`${Math.max(1, Math.round((1 - progress) * 6))} min`} />
+      </div>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <p className="truncate text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </p>
+      <p className="truncate text-base font-bold text-foreground">{value}</p>
+    </div>
+  );
+}
+
 function ProofSheet({
   stop,
   offline,
   proximity,
+  autoSign,
   onClose,
   onDone,
 }: {
   stop: Stop;
   offline: boolean;
   proximity: number;
+  autoSign: boolean;
   onClose: () => void;
   onDone: () => void;
 }) {
@@ -388,7 +442,7 @@ function ProofSheet({
       </button>
 
       <div className="mt-3">
-        <SignaturePad onChange={setSignature} />
+        <SignaturePad onChange={setSignature} autoSign={autoSign} />
       </div>
 
       {failed ? (
