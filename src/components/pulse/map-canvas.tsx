@@ -121,7 +121,7 @@ export function MapCanvas({
         </>
       ) : null}
 
-      {variant === "turn" ? (
+      {variant === "turn" && !driving ? (
         <div className="absolute left-[34%] top-[52%] flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-lg">
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3">
             <path d="M4 20V10a4 4 0 0 1 4-4h9" />

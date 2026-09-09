@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 
 /** Touch/mouse signature capture. Reports the encoded path whenever it changes. */
-export function SignaturePad({ onChange }: { onChange: (path: string | null) => void }) {
+export function SignaturePad({
+  onChange,
+  autoSign = false,
+}: {
+  onChange: (path: string | null) => void;
+  /** Scripted demo: draws a signature by itself so the flow can run hands-free. */
+  autoSign?: boolean;
+}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawing = useRef(false);
   const points = useRef<string[]>([]);
