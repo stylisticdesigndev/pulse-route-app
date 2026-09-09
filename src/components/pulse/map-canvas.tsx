@@ -7,10 +7,13 @@ export function MapCanvas({
   variant = "overview",
   stopLabel,
   className,
+  driving = false,
 }: {
   variant?: Variant | undefined;
   stopLabel?: string | undefined;
   className?: string | undefined;
+  /** Animates the vehicle along the route polyline (scripted demo transit). */
+  driving?: boolean | undefined;
 }) {
   return (
     <div className={cn("relative h-full w-full overflow-hidden bg-map", className)}>
