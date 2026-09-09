@@ -314,12 +314,14 @@ function ProofSheet({
   stop,
   offline,
   proximity,
+  autoSign,
   onClose,
   onDone,
 }: {
   stop: Stop;
   offline: boolean;
   proximity: number;
+  autoSign: boolean;
   onClose: () => void;
   onDone: () => void;
 }) {
