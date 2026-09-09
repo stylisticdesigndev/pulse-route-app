@@ -67,14 +67,25 @@ export function MapCanvas({
         ) : null}
 
         {variant === "turn" ? (
-          <polyline
-            points="130,510 130,280 260,280 260,60"
-            fill="none"
-            stroke="var(--primary)"
-            strokeWidth="9"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          <>
+            <polyline
+              points="130,510 130,280 260,280 260,60"
+              fill="none"
+              stroke="var(--primary)"
+              strokeWidth="9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            {driving ? (
+              <circle r="11" fill="var(--primary)" stroke="#ffffff" strokeWidth="3">
+                <animateMotion
+                  dur="5s"
+                  fill="freeze"
+                  path="M130,510 L130,280 L260,280 L260,60"
+                />
+              </circle>
+            ) : null}
+          </>
         ) : null}
 
         {variant === "reroute" ? (
