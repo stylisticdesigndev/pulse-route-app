@@ -310,6 +310,48 @@ function SheetFrame({
   );
 }
 
+/** Live speed / distance readout while the scripted vehicle drives the route. */
+function DriveHud({ totalKm }: { totalKm: number }) {
+  const fmt = useUnitPrefs();
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const started = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - started) / 5000);
+      setProgress(t);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const speed = Math.round(14 + Math.sin(progress * Math.PI) * 26);
+  const remaining = Math.max(0, totalKm * (1 - progress));
+
+  return (
+    <div className="pointer-events-none absolute inset-x-3 bottom-16 z-10">
+      <div className="grid grid-cols-3 gap-2 rounded-2xl border border-primary/40 bg-card/95 p-3 backdrop-blur">
+        <Stat label="Speed" value={`${speed} mph`} />
+        <Stat label="Remaining" value={fmt.km(remaining)} />
+        <Stat label="Arriving" value={`${Math.max(1, Math.round((1 - progress) * 6))} min`} />
+      </div>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <p className="truncate text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </p>
+      <p className="truncate text-base font-bold text-foreground">{value}</p>
+    </div>
+  );
+}
+
 function ProofSheet({
   stop,
   offline,
