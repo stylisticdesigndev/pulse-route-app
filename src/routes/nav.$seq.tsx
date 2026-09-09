@@ -261,6 +261,7 @@ function NavigationScreen() {
           stop={stop}
           offline={offline}
           proximity={proximity}
+          autoSign={ghost.running}
           onClose={() => setSheet("none")}
           onDone={() => navigate({ to: "/manifest" })}
         />
@@ -397,7 +398,7 @@ function ProofSheet({
       </button>
 
       <div className="mt-3">
-        <SignaturePad onChange={setSignature} />
+        <SignaturePad onChange={setSignature} autoSign={autoSign} />
       </div>
 
       {failed ? (
