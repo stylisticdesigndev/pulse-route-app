@@ -5,9 +5,27 @@ import { MapCanvas } from "@/components/pulse/map-canvas";
 import { stopLabel, useStops } from "@/lib/pulse-data";
 import { cn } from "@/lib/utils";
 import { useUnitPrefs } from "@/lib/units";
-import { useShowcase } from "@/lib/showcase-context";
+import { useGhost } from "@/lib/ghost-demo";
 import { demoHasPriorityStop } from "@/lib/demo-manifest";
-import { AlertTriangle, ArrowRightLeft, Leaf, TrendingUp } from "lucide-react";
+import { AlertTriangle, ArrowRightLeft, Leaf, TrendingUp, X } from "lucide-react";
+import { useEffect, useState } from "react";
+
+/** Counts a value up naturally once mounted, for the dispatch analytics panel. */
+function useCountUp(target: number, ms = 1400) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / ms);
+      setValue(Math.round(target * (1 - Math.pow(1 - t, 3))));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, ms]);
+  return value;
+}
 
 const MARKERS = [
   { id: "408", left: "34%", top: "62%" },
