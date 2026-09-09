@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Map, Package, LineChart, User } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { useShowcase } from "@/lib/showcase-context";
+
 
 const NAV = [
   { to: "/manifest", label: "Manifest", icon: Map },
@@ -21,11 +21,12 @@ export function AppShell({
   bottomNav?: boolean;
   className?: string;
 }) {
-  const { active } = useShowcase();
   return (
     <div className="fixed inset-0 flex flex-col overflow-hidden bg-background">
-      <div className={cn("no-scrollbar flex-1 overflow-y-auto overscroll-contain", className)}>
-        {active ? <div aria-hidden className="h-[300px] shrink-0" /> : null}
+      <div
+        data-app-scroll
+        className={cn("no-scrollbar flex-1 overflow-y-auto overscroll-contain", className)}
+      >
         {children}
       </div>
       {bottomNav ? <BottomNav /> : null}

@@ -2,7 +2,7 @@ import { HardHat, RadioTower, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useRole, type ActiveRole } from "@/lib/role-context";
-import { useShowcase } from "@/lib/showcase-context";
+import { useGhost } from "@/lib/ghost-demo";
 
 const OPTIONS: {
   role: ActiveRole;
@@ -31,11 +31,11 @@ const OPTIONS: {
 export function RoleSwitcher() {
   const { activeRole, setActiveRole } = useRole();
   const [open, setOpen] = useState(false);
-  const { active: showcaseActive } = useShowcase();
+  const { running } = useGhost();
   const tech = activeRole === "field_technician";
   const Icon = tech ? HardHat : RadioTower;
 
-  if (showcaseActive) return null;
+  if (running) return null;
 
   return (
     <>
