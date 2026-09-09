@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useGhost } from "@/lib/ghost-demo";
 import { toast } from "sonner";
 import { MapCanvas } from "@/components/pulse/map-canvas";
 import { SignaturePad } from "@/components/pulse/signature-pad";
