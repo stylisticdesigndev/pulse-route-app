@@ -58,8 +58,9 @@ function batteryIcon(level: number) {
 /** Dispatch supervisor fleet dashboard shown when the developer role is switched. */
 export function FleetOverview() {
   const fmt = useUnitPrefs();
-  const { active: showcaseActive, step, jumpToCourierHandoff } = useShowcase();
-  const stepId = showcaseActive ? step?.id : undefined;
+  const { phase } = useGhost();
+  const stepId = phase === "idle" || phase === "courier" ? undefined : phase;
+  const [drawer, setDrawer] = useState<string | null>(null);
   const { data: stops = [] } = useStops();
   const activeStop =
     stops.find((s) => s.status === "in_transit") ?? stops.find((s) => s.status === "pending");
