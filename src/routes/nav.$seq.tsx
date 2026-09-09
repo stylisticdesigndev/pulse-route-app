@@ -92,7 +92,14 @@ function NavigationScreen() {
   return (
     <AppShell className="flex flex-col">
       <div className="relative flex-1">
-        <MapCanvas variant={traffic ? "reroute" : "turn"} className="absolute inset-0" />
+        <MapCanvas
+          variant={traffic ? "reroute" : "turn"}
+          className="absolute inset-0"
+          driving={ghost.driving}
+        />
+
+        {ghost.driving ? <DriveHud totalKm={stop.distance_km ?? 4} /> : null}
+
 
         {traffic ? (
           <div className="safe-top absolute inset-x-3 top-0">
