@@ -102,31 +102,10 @@ export function FleetOverview() {
               Moved from Route 4 (Van #212, delayed) to Marcus Vance — Van #408.
               {demoHasPriorityStop() ? " Applied optimistically; courier notified." : ""}
             </p>
-            <BigButton className="mt-3 h-12" onClick={jumpToCourierHandoff}>
-              Open Marcus Vance's manifest
-            </BigButton>
           </section>
         ) : null}
 
-        {stepId === "telemetry" ? (
-          <section className="rounded-2xl border border-success/50 bg-success/10 p-4">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-success" />
-              <h2 className="text-xs font-bold uppercase tracking-widest text-success">
-                End-of-shift analytics
-              </h2>
-            </div>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              <Metric label="Stops completed" value="171/180" tone="text-foreground" />
-              <Metric label="On-time rate" value="98%" tone="text-success" />
-              <Metric label="Carbon offset" value="41 kg" tone="text-success" />
-            </div>
-            <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Leaf className="h-3.5 w-3.5 text-success" /> Aggregated locally from the shift event
-              log — executive summary ready to export.
-            </p>
-          </section>
-        ) : null}
+        {stepId === "telemetry" ? <TelemetryPanel /> : null}
 
         <div className="grid grid-cols-3 gap-2">
           <Metric label="Active drivers" value="8/10" tone="text-success" />
@@ -138,13 +117,20 @@ export function FleetOverview() {
           <div className="relative h-[240px]">
             <MapCanvas variant="overview" />
             {MARKERS.map((m) => (
-              <div
+              <button
                 key={m.id}
-                className="absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-full border border-warning/60 bg-warning px-2 py-1 text-[10px] font-black text-warning-foreground shadow-lg"
+                onClick={() => setDrawer(m.id)}
+                aria-label={`Van #${m.id} telemetry`}
+                className={cn(
+                  "absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-black shadow-lg transition-transform",
+                  drawer === m.id
+                    ? "scale-125 border-primary bg-primary text-primary-foreground"
+                    : "border-warning/60 bg-warning text-warning-foreground",
+                )}
                 style={{ left: m.left, top: m.top }}
               >
                 <Truck className="h-3 w-3" strokeWidth={2.6} /> {m.id}
-              </div>
+              </button>
             ))}
             <div className="absolute left-3 top-3">
               <Pill tone="warning">
@@ -152,6 +138,33 @@ export function FleetOverview() {
               </Pill>
             </div>
           </div>
+
+          {drawer ? (
+            <div className="border-t border-border bg-surface-2 px-4 py-3">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold">Van #{drawer}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {TELEMETRY.find((t) => t.van.endsWith(drawer))?.name ?? "Unassigned"} •{" "}
+                    {TELEMETRY.find((t) => t.van.endsWith(drawer))?.stop ?? "Depot"}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setDrawer(null)}
+                  aria-label="Close vehicle drawer"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-surface"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <BigButton
+                className="mt-3 h-12"
+                onClick={() => toast.success("APX-9001 moved to Van #408 — Marcus Vance")}
+              >
+                <ArrowRightLeft className="h-4 w-4" /> Reassign APX-9001 to Van #408
+              </BigButton>
+            </div>
+          ) : null}
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-border px-4 py-3">
             <p className="min-w-0 truncate text-xs text-muted-foreground">
               Van #408 — Marcus Vance{" "}
