@@ -83,6 +83,7 @@ export function GhostProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const start = useCallback(() => {
+    setHistory([]);
     token.current += 1;
     const mine = token.current;
     setRunning(true);
