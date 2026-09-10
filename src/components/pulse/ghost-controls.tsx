@@ -36,12 +36,14 @@ export function GhostControls() {
   }, [running]);
 
   const reviewing = reviewIndex !== null;
-  const shown = reviewing ? history[reviewIndex] ?? null : caption;
+  /** Role hand-off cards stay live-only; only step notes are replayable. */
+  const steps = history.filter((c) => c.kind === "step");
+  const shown = reviewing ? steps[reviewIndex] ?? null : caption;
   const stepOpacity = reviewing || !faded ? "opacity-100" : "opacity-25";
-  const canBack = history.length > 1 && (reviewIndex === null ? true : reviewIndex > 0);
+  const canBack = steps.length > 1 && (reviewIndex === null ? true : reviewIndex > 0);
 
   const goBack = () => {
-    const from = reviewIndex === null ? history.length - 1 : reviewIndex;
+    const from = reviewIndex === null ? steps.length - 1 : reviewIndex;
     setReviewIndex(Math.max(0, from - 1));
     setFaded(false);
   };
@@ -49,7 +51,7 @@ export function GhostControls() {
   const goForward = () => {
     if (reviewIndex === null) return;
     const next = reviewIndex + 1;
-    setReviewIndex(next >= history.length - 1 ? null : next);
+    setReviewIndex(next >= steps.length - 1 ? null : next);
     setFaded(false);
   };
 
@@ -89,7 +91,7 @@ export function GhostControls() {
         </div>
       )}
 
-      {running && shown?.kind === "role" ? (
+      {running && !reviewing && shown?.kind === "role" ? (
         <div className="pointer-events-none fixed inset-0 z-[68] flex items-center justify-center px-6">
           <div className="animate-scale-in w-full max-w-sm rounded-2xl border border-primary/40 bg-card/95 p-5 shadow-2xl backdrop-blur">
             <span
