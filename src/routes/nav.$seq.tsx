@@ -319,7 +319,7 @@ function DriveHud({ totalKm }: { totalKm: number }) {
     const started = performance.now();
     let raf = 0;
     const tick = (now: number) => {
-      const t = Math.min(1, (now - started) / 5000);
+      const t = Math.min(1, (now - started) / 8500);
       setProgress(t);
       if (t < 1) raf = requestAnimationFrame(tick);
     };
