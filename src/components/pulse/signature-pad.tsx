@@ -30,7 +30,7 @@ export function SignaturePad({
     ctx.strokeStyle = "#34d399";
   }, []);
 
-  // Hands-free demo: trace a natural-looking signature stroke by stroke.
+  // Hands-free demo: writes a legible cursive "M. Vance" stroke by stroke.
   useEffect(() => {
     if (!autoSign) return;
     const canvas = canvasRef.current;
@@ -39,23 +39,88 @@ export function SignaturePad({
     const rect = canvas.getBoundingClientRect();
     const w = rect.width;
     const h = rect.height;
-    const path: { x: number; y: number }[] = [];
-    for (let i = 0; i <= 90; i += 1) {
-      const t = i / 90;
-      path.push({
-        x: w * (0.12 + t * 0.74),
-        y: h * (0.55 - Math.sin(t * Math.PI * 3) * 0.24 - t * 0.06),
-      });
-    }
+
+    // Normalised key points (0-1) for each pen-down stroke of the signature.
+    const strokes: [number, number][][] = [
+      // Capital M with an entry flick
+      [
+        [0.08, 0.72],
+        [0.1, 0.3],
+        [0.15, 0.68],
+        [0.2, 0.32],
+        [0.25, 0.7],
+        [0.29, 0.58],
+      ],
+      // period after the initial
+      [
+        [0.32, 0.7],
+        [0.33, 0.71],
+      ],
+      // cursive "Vance" body: v-a-n-c-e with loops
+      [
+        [0.38, 0.34],
+        [0.42, 0.7],
+        [0.47, 0.3],
+        [0.5, 0.62],
+        [0.53, 0.48],
+        [0.5, 0.44],
+        [0.49, 0.56],
+        [0.54, 0.68],
+        [0.58, 0.44],
+        [0.6, 0.66],
+        [0.63, 0.46],
+        [0.66, 0.66],
+        [0.7, 0.5],
+        [0.68, 0.44],
+        [0.66, 0.52],
+        [0.7, 0.66],
+        [0.75, 0.56],
+        [0.72, 0.5],
+        [0.76, 0.5],
+        [0.79, 0.62],
+      ],
+      // underline flourish
+      [
+        [0.8, 0.66],
+        [0.62, 0.82],
+        [0.3, 0.8],
+        [0.14, 0.86],
+      ],
+    ];
+
+    // Densify each stroke so the pen glides rather than jumps between corners.
+    const segments = strokes.map((stroke) => {
+      const pts: { x: number; y: number }[] = [];
+      for (let s = 0; s < stroke.length - 1; s += 1) {
+        const [x0, y0] = stroke[s]!;
+        const [x1, y1] = stroke[s + 1]!;
+        const steps = 8;
+        for (let k = 0; k < steps; k += 1) {
+          const t = k / steps;
+          const ease = t * t * (3 - 2 * t);
+          pts.push({ x: w * (x0 + (x1 - x0) * ease), y: h * (y0 + (y1 - y0) * ease) });
+        }
+      }
+      const [lx, ly] = stroke[stroke.length - 1]!;
+      pts.push({ x: w * lx, y: h * ly });
+      return pts;
+    });
+
+    // Flatten into a timeline with pen-lift markers between strokes.
+    const timeline: ({ x: number; y: number; lift: boolean })[] = [];
+    segments.forEach((pts) => {
+      pts.forEach((p, i) => timeline.push({ ...p, lift: i === 0 }));
+    });
+
     let i = 0;
-    ctx.beginPath();
     const timer = window.setInterval(() => {
-      const point = path[i];
+      const point = timeline[i];
       if (!point) {
         window.clearInterval(timer);
         return;
       }
-      if (i === 0) {
+      if (point.lift) {
+        ctx.beginPath();
         ctx.moveTo(point.x, point.y);
         points.current.push(`M${Math.round(point.x)},${Math.round(point.y)}`);
       } else {
@@ -66,7 +131,7 @@ export function SignaturePad({
       setHasInk(true);
       onChange(points.current.join(" "));
       i += 1;
-    }, 12);
+    }, 14);
     return () => window.clearInterval(timer);
   }, [autoSign, onChange]);
 
