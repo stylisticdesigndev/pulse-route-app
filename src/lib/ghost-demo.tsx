@@ -18,12 +18,24 @@ export type GhostPhase = "idle" | "courier" | "anomaly" | "reassign" | "telemetr
 
 type Cursor = { x: number; y: number; pressed: boolean; visible: boolean };
 
+export type GhostCaption = {
+  /** "step" is the running narration strip; "role" is the mode hand-off card. */
+  kind: "step" | "role";
+  role: "courier" | "dispatch";
+  title: string;
+  body: string;
+  /** 1-based index of this step within its role sequence, for the progress hint. */
+  step?: number;
+  total?: number;
+};
+
 type GhostValue = {
   running: boolean;
   phase: GhostPhase;
   /** True while the scripted vehicle is animating along the navigation route. */
   driving: boolean;
   cursor: Cursor;
+  caption: GhostCaption | null;
   start: () => void;
   stop: () => void;
 };
