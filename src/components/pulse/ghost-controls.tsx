@@ -53,7 +53,7 @@ export function GhostControls() {
       {running && caption?.kind === "step" ? (
         <div
           className="pointer-events-none fixed inset-x-3 z-[66]"
-          style={{ bottom: "calc(env(safe-area-inset-bottom) + 5.25rem)" }}
+          style={{ top: "calc(env(safe-area-inset-top) + 3.25rem)" }}
         >
           <div className="animate-fade-in rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-xl backdrop-blur">
             <div className="flex items-center gap-2">
