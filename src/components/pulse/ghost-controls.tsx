@@ -27,6 +27,57 @@ export function GhostControls() {
         </button>
       )}
 
+      {running && caption?.kind === "role" ? (
+        <div className="pointer-events-none fixed inset-0 z-[68] flex items-center justify-center px-6">
+          <div className="animate-scale-in w-full max-w-sm rounded-2xl border border-primary/40 bg-card/95 p-5 shadow-2xl backdrop-blur">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-widest ${
+                caption.role === "courier"
+                  ? "bg-primary/15 text-primary"
+                  : "bg-warning/15 text-warning"
+              }`}
+            >
+              {caption.role === "courier" ? (
+                <Truck className="h-3.5 w-3.5" />
+              ) : (
+                <Radio className="h-3.5 w-3.5" />
+              )}
+              {caption.role === "courier" ? "Field courier" : "Dispatch supervisor"}
+            </span>
+            <p className="mt-3 text-lg font-bold leading-tight">{caption.title}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{caption.body}</p>
+          </div>
+        </div>
+      ) : null}
+
+      {running && caption?.kind === "step" ? (
+        <div
+          className="pointer-events-none fixed inset-x-3 z-[66]"
+          style={{ bottom: "calc(env(safe-area-inset-bottom) + 5.25rem)" }}
+        >
+          <div className="animate-fade-in rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-xl backdrop-blur">
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-widest ${
+                  caption.role === "courier"
+                    ? "bg-primary/15 text-primary"
+                    : "bg-warning/15 text-warning"
+                }`}
+              >
+                {caption.role === "courier" ? "Courier" : "Dispatch"}
+              </span>
+              {caption.step ? (
+                <span className="text-[10px] font-bold text-muted-foreground">
+                  Step {caption.step} of {caption.total}
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-1.5 text-sm font-bold leading-tight">{caption.title}</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{caption.body}</p>
+          </div>
+        </div>
+      ) : null}
+
       {running && cursor.visible ? (
         <div
           aria-hidden="true"
