@@ -79,7 +79,7 @@ export function MapCanvas({
             {driving ? (
               <circle r="11" fill="var(--primary)" stroke="#ffffff" strokeWidth="3">
                 <animateMotion
-                  dur="5s"
+                  dur="8.5s"
                   fill="freeze"
                   path="M130,510 L130,280 L260,280 L260,60"
                 />
