@@ -59,7 +59,19 @@ export function GhostProvider({ children }: { children: ReactNode }) {
   const [driving, setDriving] = useState(false);
   const [cursor, setCursor] = useState<Cursor>({ x: 0, y: 0, pressed: false, visible: false });
   const [caption, setCaption] = useState<GhostCaption | null>(null);
+  const [history, setHistory] = useState<GhostCaption[]>([]);
+  const [captionsOn, setCaptionsOn] = useState(true);
   const token = useRef(0);
+
+  const toggleCaptions = useCallback(() => setCaptionsOn((v) => !v), []);
+
+  // Keep a readable log of every narration note shown during this run.
+  useEffect(() => {
+    if (!caption) return;
+    setHistory((h) =>
+      h.length && h[h.length - 1].title === caption.title ? h : [...h, caption],
+    );
+  }, [caption]);
 
   const stop = useCallback(() => {
     token.current += 1;
