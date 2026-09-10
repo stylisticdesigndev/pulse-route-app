@@ -333,6 +333,7 @@ export function GhostProvider({ children }: { children: ReactNode }) {
       setRunning(false);
       setPhase("idle");
       setDriving(false);
+      setCaption(null);
       setCursor((c) => ({ ...c, visible: false }));
     });
   }, [navigate, queryClient, setActiveRole]);
@@ -340,8 +341,8 @@ export function GhostProvider({ children }: { children: ReactNode }) {
   useEffect(() => () => void (token.current += 1), []);
 
   const value = useMemo<GhostValue>(
-    () => ({ running, phase, driving, cursor, start, stop }),
-    [running, phase, driving, cursor, start, stop],
+    () => ({ running, phase, driving, cursor, caption, start, stop }),
+    [running, phase, driving, cursor, caption, start, stop],
   );
 
   return <GhostContext.Provider value={value}>{children}</GhostContext.Provider>;
