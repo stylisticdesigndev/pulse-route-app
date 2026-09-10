@@ -1,9 +1,10 @@
-import { Play, Square } from "lucide-react";
+import { Play, Square, Truck, Radio } from "lucide-react";
 import { useGhost } from "@/lib/ghost-demo";
 
-/** Discreet demo trigger, the animated touch indicator, and the stop control. */
+/** Discreet demo trigger, narration, the animated touch indicator, and the stop control. */
 export function GhostControls() {
-  const { running, cursor, start, stop } = useGhost();
+  const { running, cursor, caption, start, stop } = useGhost();
+
 
 
   return (
