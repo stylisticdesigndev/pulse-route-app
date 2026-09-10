@@ -1,11 +1,10 @@
 import { Play, Square } from "lucide-react";
-import { useRouterState } from "@tanstack/react-router";
 import { useGhost } from "@/lib/ghost-demo";
 
 /** Discreet demo trigger, the animated touch indicator, and the stop control. */
 export function GhostControls() {
   const { running, cursor, start, stop } = useGhost();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
 
   return (
     <>
