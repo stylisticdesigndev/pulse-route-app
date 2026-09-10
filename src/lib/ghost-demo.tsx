@@ -18,12 +18,24 @@ export type GhostPhase = "idle" | "courier" | "anomaly" | "reassign" | "telemetr
 
 type Cursor = { x: number; y: number; pressed: boolean; visible: boolean };
 
+export type GhostCaption = {
+  /** "step" is the running narration strip; "role" is the mode hand-off card. */
+  kind: "step" | "role";
+  role: "courier" | "dispatch";
+  title: string;
+  body: string;
+  /** 1-based index of this step within its role sequence, for the progress hint. */
+  step?: number;
+  total?: number;
+};
+
 type GhostValue = {
   running: boolean;
   phase: GhostPhase;
   /** True while the scripted vehicle is animating along the navigation route. */
   driving: boolean;
   cursor: Cursor;
+  caption: GhostCaption | null;
   start: () => void;
   stop: () => void;
 };
@@ -41,6 +53,7 @@ export function GhostProvider({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<GhostPhase>("idle");
   const [driving, setDriving] = useState(false);
   const [cursor, setCursor] = useState<Cursor>({ x: 0, y: 0, pressed: false, visible: false });
+  const [caption, setCaption] = useState<GhostCaption | null>(null);
   const token = useRef(0);
 
   const stop = useCallback(() => {
@@ -48,6 +61,7 @@ export function GhostProvider({ children }: { children: ReactNode }) {
     setRunning(false);
     setPhase("idle");
     setDriving(false);
+    setCaption(null);
     setCursor((c) => ({ ...c, visible: false, pressed: false }));
   }, []);
 
@@ -138,17 +152,40 @@ export function GhostProvider({ children }: { children: ReactNode }) {
       await sleep(900);
     }
 
+    /** Narrate the current step so a first-time viewer knows what they're seeing. */
+    function say(step: number, title: string, body: string) {
+      setCaption({ kind: "step", role: "courier", title, body, step, total: 8 });
+    }
+
+    function sayDispatch(step: number, title: string, body: string) {
+      setCaption({ kind: "step", role: "dispatch", title, body, step, total: 4 });
+    }
+
     async function run() {
       /* ---------------- Courier: Marcus Vance ---------------- */
       setActiveRole("field_technician");
 
+      setCaption({
+        kind: "role",
+        role: "courier",
+        title: "Courier mode — Marcus Vance",
+        body: "What the driver holds in the van: one stop at a time, big buttons, works with no signal. Everything you're about to see is the real app being tapped for you.",
+      });
+      await sleep(4200);
+
       if (window.location.pathname === "/auth") {
+        say(1, "Signing in", "One-tap demo sign-in as courier Marcus Vance, Van #408, route RT-8842.");
         await tap("Demo Courier", 8000);
         await sleep(1400);
       }
 
       // Pre-trip checks + shift start
       if (await waitFor("Start Shift", 4000)) {
+        say(
+          2,
+          "Pre-trip inspection",
+          "Before the wheels move: tyres, brakes, lights and load are signed off, and the odometer is logged.",
+        );
         await scrollBy(240);
         await tap("Start Shift");
         await sleep(1600);
@@ -156,6 +193,11 @@ export function GhostProvider({ children }: { children: ReactNode }) {
 
       // Manifest: read the manifest, then open navigation for the active stop.
       await waitFor("Start Navigation", 8000);
+      say(
+        3,
+        "Today's stop list",
+        "Five stops in delivery order with time windows. The courier only acts on the top one.",
+      );
       await scrollBy(220);
       await scrollBy(-220);
       await tap("Start Navigation");
@@ -166,6 +208,11 @@ export function GhostProvider({ children }: { children: ReactNode }) {
 
       // Parcel scanning at the van
       await navigate({ to: "/scan/$seq", params: { seq } });
+      say(
+        4,
+        "Scanning the parcels",
+        "Each barcode is checked against the manifest, so the wrong box can never leave the van.",
+      );
       await sleep(1800);
       for (let i = 0; i < 4; i += 1) {
         alive();
@@ -178,40 +225,74 @@ export function GhostProvider({ children }: { children: ReactNode }) {
 
       // Turn-by-turn transit
       alive();
+      say(
+        5,
+        "Driving to the stop",
+        "Turn-by-turn guidance with live speed and distance. The van follows the route to the marked destination.",
+      );
       setDriving(true);
-      await sleep(5200);
+      await sleep(5400);
       setDriving(false);
-      await sleep(600);
+      say(6, "Arrived", "Geofence confirms the van is at the door, so the delivery can be closed out.");
+      await sleep(1200);
 
       // Arrival + proof of delivery
       await tap("Arrived at Stop", 5000);
-      await sleep(1400);
+      await sleep(1200);
+      say(
+        7,
+        "Proof of delivery",
+        "Camera photographs the parcel where it was left, then the recipient signs on the glass.",
+      );
       await tap("Capture Parcel Photo", 5000);
-      await sleep(1900); // signature pad auto-signs here
+      await sleep(3400); // camera focus, shutter, then the signature is written
       await tap("Drop-Off", 6000);
-      await sleep(2200);
+      await sleep(2000);
 
       // Manifest reflects the completed stop
       alive();
+      say(8, "Stop closed", "The stop is ticked off and the proof syncs to dispatch — or queues if offline.");
       await navigate({ to: "/manifest" });
-      await sleep(2400);
+      await sleep(2600);
 
       /* ---------------- Dispatch supervisor ---------------- */
       alive();
+      setCaption({
+        kind: "role",
+        role: "dispatch",
+        title: "Switching to Dispatch Supervisor",
+        body: "Same data, opposite chair. The supervisor never drives — they watch every van at once, spot problems early and move work between couriers.",
+      });
+      await sleep(4800);
       setActiveRole("dispatch_supervisor");
       await navigate({ to: "/manifest" });
-      await sleep(1800);
+      sayDispatch(
+        1,
+        "Live fleet console",
+        "Every van, its driver and its progress on one map, with fleet-wide on-time numbers above it.",
+      );
+      await sleep(2600);
 
       setPhase("anomaly");
+      sayDispatch(
+        2,
+        "A problem surfaces",
+        "Van #212 leaves its geofence with a maintenance flag — dispatch is alerted before the customer complains.",
+      );
       toast.error("Route 4 — delivery delayed 18 min", {
         description: "Geofence breach + maintenance flag on Van #212 (Dana Whitfield).",
         duration: 5000,
       });
-      await sleep(2200);
+      await sleep(2600);
 
       await tap("Van #212 telemetry", 5000);
       await sleep(1600);
       setPhase("reassign");
+      sayDispatch(
+        3,
+        "Moving the work",
+        "The priority parcel is pulled off the delayed van and pushed to Marcus Vance — his stop list updates instantly.",
+      );
       const reassigned = await tap("Reassign APX-9001", 5000);
       if (reassigned) {
         demoInjectPriorityStop();
@@ -221,13 +302,27 @@ export function GhostProvider({ children }: { children: ReactNode }) {
           description: "Priority parcel pushed to Van #408 — courier notified.",
         });
       }
-      await sleep(2400);
+      await sleep(2600);
 
       setPhase("telemetry");
+      sayDispatch(
+        4,
+        "End-of-day picture",
+        "Stops completed, on-time rate and fuel saved — the numbers a depot manager reports on.",
+      );
       await scrollBy(-400);
+      await sleep(4600);
+
+      setCaption({
+        kind: "role",
+        role: "dispatch",
+        title: "That's the full loop",
+        body: "Courier and dispatch, one system. Use the role switch any time to explore either side yourself.",
+      });
       await sleep(4200);
 
       setCursor((c) => ({ ...c, visible: false }));
+      setCaption(null);
       setRunning(false);
       setPhase("idle");
     }
@@ -238,6 +333,7 @@ export function GhostProvider({ children }: { children: ReactNode }) {
       setRunning(false);
       setPhase("idle");
       setDriving(false);
+      setCaption(null);
       setCursor((c) => ({ ...c, visible: false }));
     });
   }, [navigate, queryClient, setActiveRole]);
@@ -245,8 +341,8 @@ export function GhostProvider({ children }: { children: ReactNode }) {
   useEffect(() => () => void (token.current += 1), []);
 
   const value = useMemo<GhostValue>(
-    () => ({ running, phase, driving, cursor, start, stop }),
-    [running, phase, driving, cursor, start, stop],
+    () => ({ running, phase, driving, cursor, caption, start, stop }),
+    [running, phase, driving, cursor, caption, start, stop],
   );
 
   return <GhostContext.Provider value={value}>{children}</GhostContext.Provider>;

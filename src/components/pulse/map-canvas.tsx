@@ -121,6 +121,17 @@ export function MapCanvas({
         </>
       ) : null}
 
+      {variant === "turn" ? (
+        <div className="absolute left-[72%] top-[11%] -translate-x-1/2 -translate-y-1/2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-success text-[10px] font-black text-success-foreground shadow-lg">
+            STOP
+          </span>
+          <span className="mt-1 block whitespace-nowrap rounded-full bg-card/90 px-2 py-0.5 text-[9px] font-bold text-muted-foreground">
+            Destination
+          </span>
+        </div>
+      ) : null}
+
       {variant === "turn" && !driving ? (
         <div className="absolute left-[34%] top-[52%] flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-lg">
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3">

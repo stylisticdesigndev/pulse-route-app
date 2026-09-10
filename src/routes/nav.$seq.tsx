@@ -367,12 +367,27 @@ function ProofSheet({
   onClose: () => void;
   onDone: () => void;
 }) {
-  const [photo, setPhoto] = useState(false);
+  const [stage, setStage] = useState<"idle" | "framing" | "flash" | "done">("idle");
+  const photo = stage === "done";
   const [signature, setSignature] = useState<string | null>(null);
   const [partial, setPartial] = useState(false);
   const [failed, setFailed] = useState(false);
   const submit = useSubmitEvent();
   const near = proximity <= 50;
+
+  // Camera sequence: focus on the parcel, shutter flash, then the saved photo.
+  useEffect(() => {
+    if (stage === "framing") {
+      const t = window.setTimeout(() => setStage("flash"), 1000);
+      return () => window.clearTimeout(t);
+    }
+    if (stage === "flash") {
+      const t = window.setTimeout(() => setStage("done"), 600);
+      return () => window.clearTimeout(t);
+    }
+    return;
+  }, [stage]);
+
 
   async function complete() {
     try {
@@ -404,14 +419,40 @@ function ProofSheet({
   return (
     <SheetFrame title="Proof of Service" subtitle={`Stop ${stopLabel(stop.seq)} • ${stop.recipient}`} onClose={onClose}>
       <button
-        onClick={() => setPhoto(true)}
-        className="w-full rounded-2xl border border-border bg-surface px-4 py-8 text-center"
+        onClick={() => {
+          if (stage === "idle") setStage("framing");
+        }}
+        className="relative w-full overflow-hidden rounded-2xl border border-border bg-surface px-4 py-8 text-center"
       >
-        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/20">
-          <Camera className="h-7 w-7 text-primary" />
-        </span>
+        {stage === "framing" || stage === "flash" ? (
+          <span className="absolute inset-0 block bg-black/80">
+            <span className="absolute inset-6 block rounded-lg border-2 border-primary/70">
+              <span className="absolute left-1/2 top-1/2 block h-14 w-14 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-lg border-2 border-success" />
+            </span>
+            <span className="absolute inset-x-0 bottom-2 block text-[11px] font-bold text-success">
+              {stage === "flash" ? "Capturing…" : "Focusing on parcel…"}
+            </span>
+            {stage === "flash" ? (
+              <span className="absolute inset-0 block animate-fade-in bg-white/80" />
+            ) : null}
+          </span>
+        ) : null}
+
+        {stage === "done" ? (
+          <span className="mx-auto block h-24 w-36 animate-scale-in overflow-hidden rounded-lg border border-success/50 bg-gradient-to-b from-surface-2 to-black">
+            <span className="relative block h-full w-full">
+              <span className="absolute bottom-0 left-1/2 block h-14 w-16 -translate-x-1/2 rounded-t-sm bg-surface-2" />
+              <span className="absolute bottom-1 left-1/2 block h-7 w-9 -translate-x-1/2 rounded-sm bg-warning/70" />
+              <span className="absolute bottom-3 left-1/2 block h-[2px] w-9 -translate-x-1/2 bg-black/40" />
+            </span>
+          </span>
+        ) : (
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/20">
+            <Camera className="h-7 w-7 text-primary" />
+          </span>
+        )}
         <span className="mt-3 block text-sm font-bold">
-          {photo ? "Parcel photo captured" : "Tap to Capture Parcel Photo"}
+          {stage === "done" ? "Parcel photo captured" : "Tap to Capture Parcel Photo"}
         </span>
         <span
           className={`mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold ${
