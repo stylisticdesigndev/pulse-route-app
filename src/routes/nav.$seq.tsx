@@ -367,7 +367,8 @@ function ProofSheet({
   onClose: () => void;
   onDone: () => void;
 }) {
-  const [photo, setPhoto] = useState(false);
+  const [stage, setStage] = useState<"idle" | "framing" | "flash" | "done">("idle");
+  const photo = stage === "done";
   const [signature, setSignature] = useState<string | null>(null);
   const [partial, setPartial] = useState(false);
   const [failed, setFailed] = useState(false);
