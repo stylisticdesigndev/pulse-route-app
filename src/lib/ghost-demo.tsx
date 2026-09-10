@@ -361,8 +361,19 @@ export function GhostProvider({ children }: { children: ReactNode }) {
   useEffect(() => () => void (token.current += 1), []);
 
   const value = useMemo<GhostValue>(
-    () => ({ running, phase, driving, cursor, caption, start, stop }),
-    [running, phase, driving, cursor, caption, start, stop],
+    () => ({
+      running,
+      phase,
+      driving,
+      cursor,
+      caption,
+      history,
+      captionsOn,
+      toggleCaptions,
+      start,
+      stop,
+    }),
+    [running, phase, driving, cursor, caption, history, captionsOn, toggleCaptions, start, stop],
   );
 
   return <GhostContext.Provider value={value}>{children}</GhostContext.Provider>;
