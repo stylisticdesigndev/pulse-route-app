@@ -375,6 +375,20 @@ function ProofSheet({
   const submit = useSubmitEvent();
   const near = proximity <= 50;
 
+  // Camera sequence: focus on the parcel, shutter flash, then the saved photo.
+  useEffect(() => {
+    if (stage === "framing") {
+      const t = window.setTimeout(() => setStage("flash"), 1000);
+      return () => window.clearTimeout(t);
+    }
+    if (stage === "flash") {
+      const t = window.setTimeout(() => setStage("done"), 600);
+      return () => window.clearTimeout(t);
+    }
+    return;
+  }, [stage]);
+
+
   async function complete() {
     try {
       setFailed(false);
