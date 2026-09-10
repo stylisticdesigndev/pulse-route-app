@@ -36,6 +36,11 @@ type GhostValue = {
   driving: boolean;
   cursor: Cursor;
   caption: GhostCaption | null;
+  /** Every caption shown so far this run, so viewers can step back over missed notes. */
+  history: GhostCaption[];
+  /** Master switch for the narration strip (role hand-off cards always show). */
+  captionsOn: boolean;
+  toggleCaptions: () => void;
   start: () => void;
   stop: () => void;
 };
