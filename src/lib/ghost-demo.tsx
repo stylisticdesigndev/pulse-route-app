@@ -36,6 +36,11 @@ type GhostValue = {
   driving: boolean;
   cursor: Cursor;
   caption: GhostCaption | null;
+  /** Every caption shown so far this run, so viewers can step back over missed notes. */
+  history: GhostCaption[];
+  /** Master switch for the narration strip (role hand-off cards always show). */
+  captionsOn: boolean;
+  toggleCaptions: () => void;
   start: () => void;
   stop: () => void;
 };
@@ -54,7 +59,19 @@ export function GhostProvider({ children }: { children: ReactNode }) {
   const [driving, setDriving] = useState(false);
   const [cursor, setCursor] = useState<Cursor>({ x: 0, y: 0, pressed: false, visible: false });
   const [caption, setCaption] = useState<GhostCaption | null>(null);
+  const [history, setHistory] = useState<GhostCaption[]>([]);
+  const [captionsOn, setCaptionsOn] = useState(true);
   const token = useRef(0);
+
+  const toggleCaptions = useCallback(() => setCaptionsOn((v) => !v), []);
+
+  // Keep a readable log of every narration note shown during this run.
+  useEffect(() => {
+    if (!caption) return;
+    setHistory((h) =>
+      h[h.length - 1]?.title === caption.title ? h : [...h, caption],
+    );
+  }, [caption]);
 
   const stop = useCallback(() => {
     token.current += 1;
@@ -66,6 +83,7 @@ export function GhostProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const start = useCallback(() => {
+    setHistory([]);
     token.current += 1;
     const mine = token.current;
     setRunning(true);
@@ -344,8 +362,19 @@ export function GhostProvider({ children }: { children: ReactNode }) {
   useEffect(() => () => void (token.current += 1), []);
 
   const value = useMemo<GhostValue>(
-    () => ({ running, phase, driving, cursor, caption, start, stop }),
-    [running, phase, driving, cursor, caption, start, stop],
+    () => ({
+      running,
+      phase,
+      driving,
+      cursor,
+      caption,
+      history,
+      captionsOn,
+      toggleCaptions,
+      start,
+      stop,
+    }),
+    [running, phase, driving, cursor, caption, history, captionsOn, toggleCaptions, start, stop],
   );
 
   return <GhostContext.Provider value={value}>{children}</GhostContext.Provider>;
