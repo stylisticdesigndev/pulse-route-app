@@ -53,6 +53,7 @@ export function GhostProvider({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<GhostPhase>("idle");
   const [driving, setDriving] = useState(false);
   const [cursor, setCursor] = useState<Cursor>({ x: 0, y: 0, pressed: false, visible: false });
+  const [caption, setCaption] = useState<GhostCaption | null>(null);
   const token = useRef(0);
 
   const stop = useCallback(() => {
@@ -60,6 +61,7 @@ export function GhostProvider({ children }: { children: ReactNode }) {
     setRunning(false);
     setPhase("idle");
     setDriving(false);
+    setCaption(null);
     setCursor((c) => ({ ...c, visible: false, pressed: false }));
   }, []);
 
