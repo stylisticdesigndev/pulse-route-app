@@ -12,7 +12,7 @@ import {
 import { useGhost } from "@/lib/ghost-demo";
 
 /** How long a step note stays fully visible before it fades away. */
-const FADE_AFTER_MS = 5200;
+const FADE_AFTER_MS = 2500;
 
 /** Discreet demo trigger, narration, the animated touch indicator, and the stop control. */
 export function GhostControls() {
