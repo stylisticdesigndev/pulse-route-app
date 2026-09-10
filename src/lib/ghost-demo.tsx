@@ -69,7 +69,7 @@ export function GhostProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!caption) return;
     setHistory((h) =>
-      h.length && h[h.length - 1].title === caption.title ? h : [...h, caption],
+      h[h.length - 1]?.title === caption.title ? h : [...h, caption],
     );
   }, [caption]);
 
