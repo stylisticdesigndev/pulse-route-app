@@ -40,14 +40,6 @@ export function GhostControls() {
         />
       ) : null}
 
-      {running && pathname !== "/auth" ? (
-        <span
-          className="pointer-events-none fixed left-1/2 z-[60] -translate-x-1/2 rounded-full border border-primary/40 bg-card/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary backdrop-blur"
-          style={{ bottom: "calc(env(safe-area-inset-bottom) + 5.5rem)" }}
-        >
-          Hands-free demo running
-        </span>
-      ) : null}
     </>
   );
 }
