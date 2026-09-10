@@ -81,12 +81,15 @@ export function GhostProvider({ children }: { children: ReactNode }) {
       if (token.current !== mine) throw new Cancelled();
     };
 
+    /** Playback pace: >1 slows every scripted pause so viewers can read along. */
+    const PACE = 1.6;
+
     const sleep = (ms: number) =>
       new Promise<void>((resolve, reject) => {
         const id = window.setTimeout(() => {
           if (token.current !== mine) reject(new Cancelled());
           else resolve();
-        }, ms);
+        }, Math.round(ms * PACE));
         void id;
       });
 
